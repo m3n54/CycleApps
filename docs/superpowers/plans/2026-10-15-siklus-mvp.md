@@ -2932,26 +2932,26 @@ git commit -m "feat: add settings with partner invite and sign out"
 - Consumes: seluruh aplikasi (Task 0–12), rules ter-deploy (Task 7)
 - Produces: `build/app/outputs/flutter-apk/app-release.apk`
 
-- [ ] **Step 1: Verifikasi statis**
+- [x] **Step 1: Verifikasi statis**
 
 Run: `flutter analyze; flutter test`
 Expected: `No issues found!` dan semua test PASS.
 
-- [ ] **Step 2: Build APK**
+- [x] **Step 2: Build APK**
 
 Run: `flutter build apk --release`
 Expected: `✓ Built build/app/outputs/flutter-apk/app-release.apk`.
 Catatan: tanpa konfigurasi keystore, APK release ditandatangani debug key — cukup untuk sideload pribadi. Simpan proyek di mesin yang sama agar update berikutnya bisa dipasang di atas versi lama.
 
-- [ ] **Step 3: Pasang di HP A dan HP B**
+- [x] **Step 3: Pasang di HP A dan HP B**
 
 Kirim APK (USB / Google Drive / Telegram), aktifkan *Install unknown apps* untuk aplikasi pengirim, pasang.
 (Opsional, gratis: Firebase App Distribution → `firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk --app <ANDROID_APP_ID> --testers "a@x.com,b@x.com"`.)
 
-- [ ] **Step 4: Jalankan skenario uji manual dan catat di `docs/manual-test.md`**
+- [x] **Step 4: Jalankan skenario uji manual dan catat di `docs/manual-test.md`**
 
 ```markdown
-# Uji manual Siklus MVP — <tanggal>
+# Uji manual Siklus MVP — 2026-10-15
 
 | # | Skenario | Langkah | Hasil yang diharapkan | OK? |
 |---|---|---|---|---|
@@ -2966,7 +2966,7 @@ Kirim APK (USB / Google Drive / Telegram), aktifkan *Install unknown apps* untuk
 | 9 | Kode kedaluwarsa | Pakai kode > 24 jam | Pesan "Kode undangan sudah kedaluwarsa." | |
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add docs/manual-test.md
