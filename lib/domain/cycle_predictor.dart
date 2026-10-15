@@ -1,3 +1,4 @@
+import 'cycle_phase.dart';
 import 'date_key.dart';
 import 'day_entry.dart';
 
@@ -45,6 +46,27 @@ class CyclePrediction {
   /// Positif = hari menuju haid berikutnya; negatif = terlambat; null = belum ada data.
   int? daysUntilNext(DateTime today) =>
       nextPeriodStart == null ? null : daysBetween(today, nextPeriodStart!);
+
+  int? cycleDayNumber(DateTime today) {
+    if (periods.isEmpty) return null;
+    final diff = daysBetween(periods.last.start, today);
+    return diff >= 0 ? diff + 1 : null;
+  }
+
+  CyclePhase currentPhase(DateTime today) {
+    if (periods.isNotEmpty && _within(today, periods.last.start, periods.last.end)) {
+      return CyclePhase.menstrual;
+    }
+    if (isFertile(today) || isOvulation(today)) {
+      return CyclePhase.ovulation;
+    }
+    if (periods.isNotEmpty && fertileStart != null) {
+      if (daysBetween(periods.last.end, today) > 0 && daysBetween(today, fertileStart!) > 0) {
+        return CyclePhase.follicular;
+      }
+    }
+    return CyclePhase.luteal;
+  }
 }
 
 class CyclePredictor {

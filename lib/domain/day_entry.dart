@@ -6,6 +6,10 @@ enum Symptom { cramps, headache, breastTenderness, acne, backache, bloating, nau
 
 enum Mood { happy, calm, sad, anxious, irritable, sensitive }
 
+enum CervicalMucus { dry, sticky, creamy, eggWhite }
+
+enum SexualActivity { none, protected, unprotected, highDrive }
+
 class DayEntry {
   const DayEntry({
     required this.date,
@@ -13,6 +17,8 @@ class DayEntry {
     this.symptoms = const {},
     this.moods = const {},
     this.energy,
+    this.cervicalMucus,
+    this.sexualActivity,
     this.note = '',
     this.updatedBy,
   });
@@ -22,6 +28,8 @@ class DayEntry {
   final Set<Symptom> symptoms;
   final Set<Mood> moods;
   final Energy? energy;
+  final CervicalMucus? cervicalMucus;
+  final SexualActivity? sexualActivity;
   final String note;
   final String? updatedBy;
 
@@ -29,7 +37,13 @@ class DayEntry {
       flow == FlowLevel.light || flow == FlowLevel.medium || flow == FlowLevel.heavy;
 
   bool get isEmpty =>
-      flow == null && symptoms.isEmpty && moods.isEmpty && energy == null && note.trim().isEmpty;
+      flow == null &&
+      symptoms.isEmpty &&
+      moods.isEmpty &&
+      energy == null &&
+      cervicalMucus == null &&
+      sexualActivity == null &&
+      note.trim().isEmpty;
 
   /// Tidak memuat updatedBy/updatedAt; keduanya diisi repository.
   Map<String, dynamic> toMap() => {
@@ -38,6 +52,8 @@ class DayEntry {
         'symptoms': (symptoms.map((s) => s.name).toList()..sort()),
         'moods': (moods.map((m) => m.name).toList()..sort()),
         'energy': energy?.name,
+        'cervicalMucus': cervicalMucus?.name,
+        'sexualActivity': sexualActivity?.name,
         'note': note,
       };
 
@@ -47,6 +63,8 @@ class DayEntry {
         symptoms: _enumSet(Symptom.values, map['symptoms']),
         moods: _enumSet(Mood.values, map['moods']),
         energy: _enumOrNull(Energy.values, map['energy']),
+        cervicalMucus: _enumOrNull(CervicalMucus.values, map['cervicalMucus']),
+        sexualActivity: _enumOrNull(SexualActivity.values, map['sexualActivity']),
         note: (map['note'] as String?) ?? '',
         updatedBy: map['updatedBy'] as String?,
       );
