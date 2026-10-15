@@ -96,7 +96,7 @@ siklus/
 - Consumes: —
 - Produces: `class SiklusApp extends StatelessWidget` di `lib/app.dart`; `DefaultFirebaseOptions.currentPlatform` di `lib/firebase_options.dart`.
 
-- [ ] **Step 1: Pasang tools (sekali saja)**
+- [x] **Step 1: Pasang tools (sekali saja)**
 
 Pastikan tersedia (semua gratis):
 - Flutter SDK stable + Android Studio (Android SDK, emulator) → cek `flutter doctor` tanpa error untuk Android.
@@ -107,14 +107,14 @@ Pastikan tersedia (semua gratis):
 Run: `flutter doctor; firebase --version; java -version; flutterfire --version`
 Expected: semua perintah mencetak versi, `flutter doctor` menunjukkan ✓ untuk Android toolchain.
 
-- [ ] **Step 2: Buat proyek Firebase di console (manual)**
+- [x] **Step 2: Buat proyek Firebase di console (manual)**
 
 1. https://console.firebase.google.com → *Add project* → nama `siklus` → **matikan Google Analytics**.
 2. *Build → Authentication → Get started → Sign-in method → Email/Password → Enable*.
 3. *Build → Firestore Database → Create database → Production mode → lokasi `asia-southeast2`*.
 4. Pastikan paket tetap **Spark** (gratis).
 
-- [ ] **Step 3: Scaffold Flutter**
+- [x] **Step 3: Scaffold Flutter**
 
 Run (PowerShell, di `C:\Menza\siklus`):
 ```powershell
@@ -125,7 +125,7 @@ Remove-Item test\widget_test.dart
 ```
 Expected: `pubspec.yaml` berisi semua dependensi; tidak ada error resolusi versi.
 
-- [ ] **Step 4: Hubungkan ke Firebase**
+- [x] **Step 4: Hubungkan ke Firebase**
 
 Run:
 ```powershell
@@ -136,14 +136,14 @@ firebase use --add
 Pilih proyek `siklus`; untuk `firebase use --add` beri alias `default`.
 Expected: file `lib/firebase_options.dart`, `android/app/google-services.json`, dan `.firebaserc` terbentuk.
 
-- [ ] **Step 5: Set minSdk**
+- [x] **Step 5: Set minSdk**
 
 Di `android/app/build.gradle.kts`, dalam blok `defaultConfig`, ganti baris `minSdk = flutter.minSdkVersion` menjadi:
 ```kotlin
 minSdk = maxOf(flutter.minSdkVersion, 23)
 ```
 
-- [ ] **Step 6: Tulis `lib/app.dart` placeholder**
+- [x] **Step 6: Tulis `lib/app.dart` placeholder**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -160,7 +160,7 @@ class SiklusApp extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 7: Tulis `lib/main.dart`**
+- [x] **Step 7: Tulis `lib/main.dart`**
 
 ```dart
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -184,12 +184,12 @@ Future<void> main() async {
 }
 ```
 
-- [ ] **Step 8: Verifikasi build & jalan**
+- [x] **Step 8: Verifikasi build & jalan**
 
 Run: `flutter analyze` lalu `flutter run` (emulator atau HP via USB).
 Expected: analyze `No issues found!`; aplikasi menampilkan "Siklus terhubung ke Firebase" tanpa crash.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```powershell
 git init
