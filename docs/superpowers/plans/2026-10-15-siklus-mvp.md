@@ -215,7 +215,7 @@ git commit -m "chore: scaffold flutter app and connect firebase"
   - `class DayEntry { String date; FlowLevel? flow; Set<Symptom> symptoms; Set<Mood> moods; Energy? energy; String note; String? updatedBy; bool get isPeriodDay; bool get isEmpty; Map<String, dynamic> toMap(); factory DayEntry.fromMap(Map<String, dynamic>) }`
   - `flowLabels`, `symptomLabels`, `moodLabels`, `energyLabels` (`Map<Enum, String>`)
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `test/domain/date_key_test.dart`:
 ```dart
@@ -295,12 +295,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `flutter test test/domain`
 Expected: FAIL — `Target of URI doesn't exist: 'package:siklus/domain/date_key.dart'`.
 
-- [ ] **Step 3: Implement `lib/domain/date_key.dart`**
+- [x] **Step 3: Implement `lib/domain/date_key.dart`**
 
 ```dart
 /// Id dokumen hari: yyyy-MM-dd (waktu lokal).
@@ -328,7 +328,7 @@ int daysBetween(DateTime from, DateTime to) {
 }
 ```
 
-- [ ] **Step 4: Implement `lib/domain/day_entry.dart`**
+- [x] **Step 4: Implement `lib/domain/day_entry.dart`**
 
 ```dart
 enum FlowLevel { spotting, light, medium, heavy }
@@ -398,7 +398,7 @@ Set<T> _enumSet<T extends Enum>(List<T> values, Object? raw) {
 }
 ```
 
-- [ ] **Step 5: Implement `lib/domain/labels.dart`**
+- [x] **Step 5: Implement `lib/domain/labels.dart`**
 
 ```dart
 import 'day_entry.dart';
@@ -437,12 +437,12 @@ const energyLabels = <Energy, String>{
 };
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `flutter test test/domain`
 Expected: PASS (8 tests).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 git add lib/domain test/domain
@@ -466,7 +466,7 @@ git commit -m "feat: add date helpers and DayEntry model"
   - `class CyclePredictor { static List<Period> detectPeriods(Iterable<DayEntry>); static CyclePrediction predict({required Iterable<DayEntry> entries, required DateTime today, int defaultCycleLength = 28, int defaultPeriodLength = 5}); }`
   - `class CycleProfile { String id; String ownerUid; List<String> memberUids; String name; int defaultCycleLength; int defaultPeriodLength; factory CycleProfile.fromMap(String id, Map<String, dynamic>) }`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `test/domain/cycle_predictor_test.dart`:
 ```dart
@@ -595,12 +595,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `flutter test test/domain/cycle_predictor_test.dart`
 Expected: FAIL — `cycle_predictor.dart` tidak ada.
 
-- [ ] **Step 3: Implement `lib/domain/cycle_predictor.dart`**
+- [x] **Step 3: Implement `lib/domain/cycle_predictor.dart`**
 
 ```dart
 import 'date_key.dart';
@@ -715,7 +715,7 @@ class CyclePredictor {
 }
 ```
 
-- [ ] **Step 4: Implement `lib/domain/cycle_profile.dart`**
+- [x] **Step 4: Implement `lib/domain/cycle_profile.dart`**
 
 ```dart
 class CycleProfile {
@@ -746,12 +746,12 @@ class CycleProfile {
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `flutter test test/domain`
 Expected: PASS (semua test domain).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add lib/domain test/domain
@@ -770,7 +770,7 @@ git commit -m "feat: add cycle prediction and profile model"
 - Consumes: —
 - Produces: `const inviteAlphabet`, `String generateInviteCode({Random? random, int length = 6})`, `String normalizeInviteCode(String input)`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```dart
 import 'dart:math';
@@ -797,12 +797,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/data/invite_code_test.dart`
 Expected: FAIL — file tidak ada.
 
-- [ ] **Step 3: Implement `lib/data/invite_code.dart`**
+- [x] **Step 3: Implement `lib/data/invite_code.dart`**
 
 ```dart
 import 'dart:math';
@@ -819,12 +819,12 @@ String normalizeInviteCode(String input) =>
     input.trim().toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `flutter test test/data/invite_code_test.dart`
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/invite_code.dart test/data/invite_code_test.dart
@@ -843,7 +843,7 @@ git commit -m "feat: add invite code generator"
 - Consumes: `FirebaseAuth` (package firebase_auth)
 - Produces: `class AuthRepository { AuthRepository(FirebaseAuth); Stream<User?> authStateChanges(); User? get currentUser; Future<void> signIn(String email, String password); Future<void> register(String email, String password); Future<void> sendPasswordReset(String email); Future<void> signOut(); }` dan `String authErrorMessage(Object error)`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```dart
 import 'package:firebase_auth/firebase_auth.dart';
@@ -881,12 +881,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/data/auth_repository_test.dart`
 Expected: FAIL — file tidak ada.
 
-- [ ] **Step 3: Implement `lib/data/auth_repository.dart`**
+- [x] **Step 3: Implement `lib/data/auth_repository.dart`**
 
 ```dart
 import 'package:firebase_auth/firebase_auth.dart';
@@ -933,12 +933,12 @@ String authErrorMessage(Object error) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `flutter test test/data/auth_repository_test.dart`
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/auth_repository.dart test/data/auth_repository_test.dart
@@ -959,7 +959,7 @@ git commit -m "feat: add auth repository with indonesian error messages"
   - `class JoinException implements Exception { final String message; }`
   - `class ProfileRepository { ProfileRepository(FirebaseFirestore db, {Random? random}); Stream<String?> watchActiveProfileId(String uid); Stream<CycleProfile?> watchProfile(String profileId); Future<String> createProfile({required String uid, required String name}); Future<String> createInvite({required String uid, required String profileId, DateTime? now}); Future<void> joinWithCode({required String uid, required String rawCode, DateTime? now}); }`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```dart
 import 'dart:math';
@@ -1031,12 +1031,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/data/profile_repository_test.dart`
 Expected: FAIL — file tidak ada.
 
-- [ ] **Step 3: Implement `lib/data/profile_repository.dart`**
+- [x] **Step 3: Implement `lib/data/profile_repository.dart`**
 
 ```dart
 import 'dart:math';
@@ -1122,12 +1122,12 @@ class ProfileRepository {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `flutter test test/data/profile_repository_test.dart`
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/profile_repository.dart test/data/profile_repository_test.dart
@@ -1146,7 +1146,7 @@ git commit -m "feat: add profile repository with invite and join"
 - Consumes: `DayEntry` (Task 1)
 - Produces: `class DayRepository { DayRepository(FirebaseFirestore db); Stream<List<DayEntry>> watchAll(String profileId); Future<void> saveDay({required String profileId, required String uid, required DayEntry entry}); }`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
@@ -1210,12 +1210,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/data/day_repository_test.dart`
 Expected: FAIL — file tidak ada.
 
-- [ ] **Step 3: Implement `lib/data/day_repository.dart`**
+- [x] **Step 3: Implement `lib/data/day_repository.dart`**
 
 ```dart
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -1248,12 +1248,12 @@ class DayRepository {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `flutter test test/data`
 Expected: PASS (semua test data).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/day_repository.dart test/data/day_repository_test.dart
@@ -1274,7 +1274,7 @@ git commit -m "feat: add day repository with last-write-wins saves"
 - Consumes: bentuk dokumen dari Task 5 & 6 (field `memberUids`, `joinedWithCode`, `days/*` keys, `invites/*`)
 - Produces: rules yang ter-deploy; perintah test `firebase emulators:exec --project demo-siklus --only firestore "npm --prefix firestore-tests test"`
 
-- [ ] **Step 1: Tulis konfigurasi Firebase CLI**
+- [x] **Step 1: Tulis konfigurasi Firebase CLI**
 
 `firebase.json` — jika file sudah ada dari flutterfire, tambahkan kunci `firestore` dan `emulators` tanpa menghapus kunci `flutter`:
 ```json
@@ -1295,7 +1295,7 @@ git commit -m "feat: add day repository with last-write-wins saves"
 { "indexes": [], "fieldOverrides": [] }
 ```
 
-- [ ] **Step 2: Tulis test rules yang gagal**
+- [x] **Step 2: Tulis test rules yang gagal**
 
 `firestore-tests/package.json`:
 ```json
@@ -1437,12 +1437,12 @@ service cloud.firestore {
 }
 ```
 
-- [ ] **Step 3: Run test to verify it fails**
+- [x] **Step 3: Run test to verify it fails**
 
 Run: `firebase emulators:exec --project demo-siklus --only firestore "npm --prefix firestore-tests test"`
 Expected: FAIL — test yang memakai `assertSucceeds` gagal (`PERMISSION_DENIED`); test `assertFails` lulus.
 
-- [ ] **Step 4: Tulis `firestore.rules` final**
+- [x] **Step 4: Tulis `firestore.rules` final**
 
 ```
 rules_version = '2';
@@ -1510,17 +1510,17 @@ service cloud.firestore {
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `firebase emulators:exec --project demo-siklus --only firestore "npm --prefix firestore-tests test"`
 Expected: PASS — `# pass 10`, `# fail 0`.
 
-- [ ] **Step 6: Deploy rules ke proyek asli**
+- [x] **Step 6: Deploy rules ke proyek asli**
 
 Run: `firebase deploy --only firestore:rules`
 Expected: `✔  Deploy complete!`
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 Add-Content .gitignore "`nfirestore-tests/node_modules/"
