@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isMember(profileId) {
+      return signedIn()
+        && request.auth.uid in get(/databases/$(database)/documents/profiles/$(profileId)).data.memberUids;
+    }
+
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /profiles/{profileId} {
+      function isValidJoin() {
+        let code = request.resource.data.joinedWithCode;
+        let invite = get(/databases/$(database)/documents/invites/$(code)).data;
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'joinedWithCode'])
+          && request.resource.data.memberUids.removeAll(resource.data.memberUids) == [request.auth.uid]
+          && resource.data.memberUids.removeAll(request.resource.data.memberUids).size() == 0
+          && request.resource.data.memberUids.size() <= 5
+          && invite.profileId == profileId
+          && invite.expiresAt > request.time;
+      }
+
+      allow read: if signedIn() && request.auth.uid in resource.data.memberUids;
+
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.memberUids == [request.auth.uid];
+
+      allow update: if signedIn() && (
+        (request.auth.uid in resource.data.memberUids
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'defaultCycleLength', 'defaultPeriodLength']))
+        || isValidJoin()
+      );
+
+      match /days/{date} {
+        allow read, delete: if isMember(profileId);
+        allow create, update: if isMember(profileId)
+          && request.resource.data.keys().hasOnly(['date', 'flow', 'symptoms', 'moods', 'energy', 'note', 'updatedBy', 'updatedAt'])
+          && request.resource.data.date == date
+          && request.resource.data.updatedBy == request.auth.uid
+          && request.resource.data.note is string
+          && request.resource.data.note.size() <= 2000
+          && request.resource.data.symptoms is list
+          && request.resource.data.moods is list;
+      }
+    }
+
+    match /invites/{code} {
+      allow get: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && isMember(request.resource.data.profileId);
+      allow delete: if signedIn() && resource.data.createdBy == request.auth.uid;
+    }
+  }
+}
