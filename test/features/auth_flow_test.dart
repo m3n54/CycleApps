@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:siklus/features/auth/auth_gate.dart';
 import 'package:siklus/features/auth/login_screen.dart';
+import 'package:siklus/features/common/widgets/cycle_logo.dart';
 import 'package:siklus/features/home/home_shell.dart';
 import 'package:siklus/features/onboarding/onboarding_screen.dart';
 import 'package:siklus/state/providers.dart';
@@ -22,10 +23,13 @@ Widget harness(MockFirebaseAuth auth, FakeFirebaseFirestore db, Widget child) =>
 void main() {
   setUpAll(() => initializeDateFormatting('id_ID'));
 
-  testWidgets('signed out → LoginScreen', (tester) async {
+  testWidgets('signed out → LoginScreen with CycleApp branding', (tester) async {
     await tester.pumpWidget(harness(MockFirebaseAuth(), FakeFirebaseFirestore(), const AuthGate()));
     await tester.pumpAndSettle();
     expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.text('CycleApp'), findsOneWidget);
+    expect(find.byType(CycleLogo), findsOneWidget);
+    expect(find.text('Lacak siklus bulanan & terhubung harmonis dengan pasangan'), findsOneWidget);
   });
 
   testWidgets('signed in without profile → OnboardingScreen', (tester) async {

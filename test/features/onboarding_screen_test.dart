@@ -4,6 +4,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:siklus/features/common/widgets/cycle_logo.dart';
 import 'package:siklus/features/onboarding/onboarding_screen.dart';
 import 'package:siklus/state/providers.dart';
 
@@ -27,10 +28,23 @@ void main() {
     db = FakeFirebaseFirestore();
   });
 
+  testWidgets('renders CycleApp onboarding header, logo, and role cards', (tester) async {
+    await pump(tester);
+    expect(find.byType(CycleLogo), findsOneWidget);
+    expect(find.text('Selamat Datang di CycleApp'), findsOneWidget);
+    expect(find.text('Pilih bagaimana Anda ingin menggunakan aplikasi'), findsOneWidget);
+    expect(find.text('Saya yang Mencatat Siklus'), findsOneWidget);
+    expect(find.text('Saya Diundang Pasangan'), findsOneWidget);
+    expect(find.text('Buat Profil & Mulai'), findsOneWidget);
+    expect(find.text('Gabung'), findsOneWidget);
+  });
+
   testWidgets('creating a profile sets activeProfileId', (tester) async {
     await pump(tester);
     await tester.enterText(find.byKey(const Key('profileName')), 'Sari');
-    await tester.tap(find.text('Buat profil'));
+    final createBtn = find.text('Buat Profil & Mulai');
+    await tester.ensureVisible(createBtn);
+    await tester.tap(createBtn);
     await tester.pumpAndSettle();
     final user = await db.doc('users/u1').get();
     final profileId = user.data()!['activeProfileId'] as String;
@@ -40,7 +54,9 @@ void main() {
 
   testWidgets('empty name shows a message', (tester) async {
     await pump(tester);
-    await tester.tap(find.text('Buat profil'));
+    final createBtn = find.text('Buat Profil & Mulai');
+    await tester.ensureVisible(createBtn);
+    await tester.tap(createBtn);
     await tester.pump();
     expect(find.text('Isi nama profil.'), findsOneWidget);
   });
@@ -53,8 +69,10 @@ void main() {
       'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(hours: 1))),
     });
     await pump(tester);
+    final joinBtn = find.text('Gabung');
+    await tester.ensureVisible(joinBtn);
     await tester.enterText(find.byKey(const Key('inviteCode')), 'abc 234');
-    await tester.tap(find.text('Gabung'));
+    await tester.tap(joinBtn);
     await tester.pumpAndSettle();
     final profile = await db.doc('profiles/p1').get();
     expect(profile.data()!['memberUids'], ['alice', 'u1']);
@@ -62,8 +80,10 @@ void main() {
 
   testWidgets('unknown code shows the JoinException message', (tester) async {
     await pump(tester);
+    final joinBtn = find.text('Gabung');
+    await tester.ensureVisible(joinBtn);
     await tester.enterText(find.byKey(const Key('inviteCode')), 'ZZZZZZ');
-    await tester.tap(find.text('Gabung'));
+    await tester.tap(joinBtn);
     await tester.pumpAndSettle();
     expect(find.text('Kode undangan tidak ditemukan.'), findsOneWidget);
   });
