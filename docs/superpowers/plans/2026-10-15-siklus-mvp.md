@@ -1548,7 +1548,15 @@ git commit -m "feat: add firestore security rules with emulator tests"
   - `authStateProvider: StreamProvider<User?>`, `activeProfileIdProvider: StreamProvider<String?>`, `activeProfileProvider: StreamProvider<CycleProfile?>`, `dayEntriesProvider: StreamProvider<List<DayEntry>>`, `predictionProvider: Provider<CyclePrediction>`
   - Widget: `AuthGate`, `LoginScreen`, `OnboardingScreen`, `HomeShell`, `SiklusApp`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement `lib/state/providers.dart`**
+- [x] **Step 4: Implement `lib/features/auth/login_screen.dart`**
+- [x] **Step 5: Buat placeholder `OnboardingScreen` dan `HomeShell`**
+- [x] **Step 6: Implement `lib/features/auth/auth_gate.dart`**
+- [x] **Step 7: Replace `lib/app.dart`**
+- [x] **Step 8: Run test to verify it passes**
+- [x] **Step 9: Commit**
 
 `test/features/auth_flow_test.dart`:
 ```dart
@@ -1618,12 +1626,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/features/auth_flow_test.dart`
 Expected: FAIL — `providers.dart`, `auth_gate.dart`, dst. tidak ada.
 
-- [ ] **Step 3: Implement `lib/state/providers.dart`**
+- [x] **Step 3: Implement `lib/state/providers.dart`**
 
 ```dart
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -1684,7 +1692,7 @@ final predictionProvider = Provider<CyclePrediction>((ref) {
 });
 ```
 
-- [ ] **Step 4: Implement `lib/features/auth/login_screen.dart`**
+- [x] **Step 4: Implement `lib/features/auth/login_screen.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1799,7 +1807,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 }
 ```
 
-- [ ] **Step 5: Buat placeholder `OnboardingScreen` dan `HomeShell`**
+- [x] **Step 5: Buat placeholder `OnboardingScreen` dan `HomeShell`**
 
 `lib/features/onboarding/onboarding_screen.dart`:
 ```dart
@@ -1825,7 +1833,7 @@ class HomeShell extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 6: Implement `lib/features/auth/auth_gate.dart`**
+- [x] **Step 6: Implement `lib/features/auth/auth_gate.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1874,7 +1882,7 @@ class _Error extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 7: Replace `lib/app.dart`**
+- [x] **Step 7: Replace `lib/app.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1896,12 +1904,12 @@ class SiklusApp extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 8: Run test to verify it passes**
+- [x] **Step 8: Run test to verify it passes**
 
 Run: `flutter test test/features/auth_flow_test.dart`
 Expected: PASS (5 tests).
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```powershell
 git add lib test/features/auth_flow_test.dart
@@ -1920,7 +1928,7 @@ git commit -m "feat: add providers, auth gate and login screen"
 - Consumes: `authStateProvider`, `profileRepositoryProvider` (Task 8), `JoinException` (Task 5)
 - Produces: `class OnboardingScreen extends ConsumerStatefulWidget` dengan field berkunci `Key('profileName')` dan `Key('inviteCode')`, tombol `'Buat profil'` dan `'Gabung'`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```dart
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -1995,12 +2003,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/features/onboarding_screen_test.dart`
 Expected: FAIL — `Key('profileName')` tidak ditemukan (masih placeholder).
 
-- [ ] **Step 3: Implement `lib/features/onboarding/onboarding_screen.dart`**
+- [x] **Step 3: Implement `lib/features/onboarding/onboarding_screen.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2102,12 +2110,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `flutter test test/features/onboarding_screen_test.dart`
 Expected: PASS (4 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/onboarding test/features/onboarding_screen_test.dart
@@ -2138,7 +2146,7 @@ git commit -m "feat: add onboarding to create or join a profile"
   - `class DayLogScreen extends ConsumerStatefulWidget { const DayLogScreen({super.key, required DateTime date}) }`
   - `class SettingsScreen extends ConsumerWidget`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `test/features/calendar_logic_test.dart`:
 ```dart
@@ -2178,12 +2186,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/features/calendar_logic_test.dart`
 Expected: FAIL — `day_marker.dart` tidak ada.
 
-- [ ] **Step 3: Implement `lib/features/calendar/day_marker.dart`**
+- [x] **Step 3: Implement `lib/features/calendar/day_marker.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2263,7 +2271,7 @@ class DayCell extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 4: Implement `lib/features/calendar/prediction_summary.dart`**
+- [x] **Step 4: Implement `lib/features/calendar/prediction_summary.dart`**
 
 ```dart
 import '../../domain/cycle_predictor.dart';
@@ -2280,12 +2288,12 @@ String predictionSummary(CyclePrediction prediction, DateTime today) {
 }
 ```
 
-- [ ] **Step 5: Run logic test to verify it passes**
+- [x] **Step 5: Run logic test to verify it passes**
 
 Run: `flutter test test/features/calendar_logic_test.dart`
 Expected: PASS (2 tests).
 
-- [ ] **Step 6: Buat placeholder `DayLogScreen` dan `SettingsScreen`**
+- [x] **Step 6: Buat placeholder `DayLogScreen` dan `SettingsScreen`**
 
 `lib/features/log/day_log_screen.dart`:
 ```dart
@@ -2319,7 +2327,7 @@ class SettingsScreen extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 7: Implement `lib/features/calendar/calendar_screen.dart`**
+- [x] **Step 7: Implement `lib/features/calendar/calendar_screen.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2428,7 +2436,7 @@ class _Legend extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 8: Replace `lib/features/home/home_shell.dart`**
+- [x] **Step 8: Replace `lib/features/home/home_shell.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2466,12 +2474,12 @@ class _HomeShellState extends State<HomeShell> {
 }
 ```
 
-- [ ] **Step 9: Run all tests**
+- [x] **Step 9: Run all tests**
 
 Run: `flutter test`
 Expected: PASS — termasuk `auth_flow_test.dart` (HomeShell sekarang merender CalendarScreen).
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```powershell
 git add lib/features test/features/calendar_logic_test.dart
@@ -2490,7 +2498,7 @@ git commit -m "feat: add calendar with predictions and home navigation"
 - Consumes: `DayEntry`, enum & label (Task 1), `dateKey` (Task 1), `dayEntriesProvider`, `activeProfileIdProvider`, `authStateProvider`, `dayRepositoryProvider` (Task 8)
 - Produces: `DayLogScreen(date: DateTime)` — tombol app bar `'Simpan'`, chip berlabel sesuai `labels.dart`, field `Key('note')`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
@@ -2504,11 +2512,12 @@ import 'package:siklus/state/providers.dart';
 
 void main() {
   late FakeFirebaseFirestore db;
-  final auth = MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'u1', email: 'a@b.co'));
+  late MockFirebaseAuth auth;
 
   setUpAll(() => initializeDateFormatting('id_ID'));
 
   setUp(() async {
+    auth = MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'u1', email: 'a@b.co'));
     db = FakeFirebaseFirestore();
     await db.doc('users/u1').set({'activeProfileId': 'p1'});
     await db.doc('profiles/p1').set({'ownerUid': 'u1', 'memberUids': ['u1'], 'name': 'A'});
@@ -2580,12 +2589,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/features/day_log_screen_test.dart`
 Expected: FAIL — teks `'Sedang'` tidak ditemukan (masih placeholder).
 
-- [ ] **Step 3: Implement `lib/features/log/day_log_screen.dart`**
+- [x] **Step 3: Implement `lib/features/log/day_log_screen.dart`**
 
 ```dart
 import 'dart:async';
@@ -2724,12 +2733,12 @@ class _DayLogScreenState extends ConsumerState<DayLogScreen> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `flutter test test/features/day_log_screen_test.dart`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/log test/features/day_log_screen_test.dart
@@ -2748,7 +2757,7 @@ git commit -m "feat: add daily log screen"
 - Consumes: `activeProfileProvider`, `activeProfileIdProvider`, `authStateProvider`, `authRepositoryProvider`, `profileRepositoryProvider` (Task 8), `cycleDisclaimer` (Task 10)
 - Produces: `SettingsScreen` dengan tile `'Undang pasangan'` (membuka dialog berisi kode 6 karakter, tombol `'Salin'` & `'Tutup'`) dan `'Keluar'`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
@@ -2810,12 +2819,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/features/settings_screen_test.dart`
 Expected: FAIL — teks `'Sari'` tidak ditemukan.
 
-- [ ] **Step 3: Implement `lib/features/settings/settings_screen.dart`**
+- [x] **Step 3: Implement `lib/features/settings/settings_screen.dart`**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2900,12 +2909,12 @@ class SettingsScreen extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 4: Run all tests**
+- [x] **Step 4: Run all tests**
 
 Run: `flutter test`
 Expected: PASS — seluruh suite hijau.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/settings test/features/settings_screen_test.dart
