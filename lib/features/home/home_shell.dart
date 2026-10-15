@@ -1,8 +1,33 @@
 import 'package:flutter/material.dart';
 
-class HomeShell extends StatelessWidget {
+import '../calendar/calendar_screen.dart';
+import '../settings/settings_screen.dart';
+
+class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
   @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Beranda')));
+  State<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends State<HomeShell> {
+  int _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _index,
+        children: const [CalendarScreen(), SettingsScreen()],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.calendar_month), label: 'Kalender'),
+          NavigationDestination(icon: Icon(Icons.settings), label: 'Pengaturan'),
+        ],
+      ),
+    );
+  }
 }
