@@ -86,75 +86,78 @@ class CycleDial extends StatelessWidget {
         ? CycleColors.borderDark
         : CycleColors.primary.withValues(alpha: 0.14);
 
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: Size(size, size),
-            painter: _CycleDialPainter(
-              progress: progress,
-              phaseColor: phaseColor,
-              trackColor: trackColor,
-              borderColor: borderColor,
-              surfaceColor: isDark ? CycleColors.surfaceDark : CycleColors.surfaceLight,
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              size: Size(size, size),
+              painter: _CycleDialPainter(
+                progress: progress,
+                phaseColor: phaseColor,
+                trackColor: trackColor,
+                borderColor: borderColor,
+                surfaceColor: isDark ? CycleColors.surfaceDark : CycleColors.surfaceLight,
+              ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(size * 0.14),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: phaseColor.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: phaseColor.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(phaseIcon, size: 14, color: phaseColor),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          phaseLabel,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: phaseColor,
-                            fontWeight: FontWeight.w700,
+            Padding(
+              padding: EdgeInsets.all(size * 0.14),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: phaseColor.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: phaseColor.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(phaseIcon, size: 14, color: phaseColor),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            phaseLabel,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: phaseColor,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  cycleDay != null ? 'Hari ke-$cycleDay' : 'Mulai Siklus',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: cycleDay != null ? 28 : 24,
-                    letterSpacing: -0.5,
+                  const SizedBox(height: 8),
+                  Text(
+                    cycleDay != null ? 'Hari ke-$cycleDay' : 'Mulai Siklus',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: cycleDay != null ? 28 : 24,
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  _subtext(daysUntil),
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    fontWeight: FontWeight.w500,
+                  const SizedBox(height: 6),
+                  Text(
+                    _subtext(daysUntil),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

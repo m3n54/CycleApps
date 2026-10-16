@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state/providers.dart';
 import '../../theme/cycle_theme.dart';
 import '../calendar/prediction_summary.dart';
+import '../common/widgets/responsive_bounds.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -80,16 +81,17 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Pengaturan & Profil')),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-          children: [
+        child: ResponsiveBounds(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            children: [
             // Profile Card
             Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Column(
                   children: [
-                    ListTile(
+                    _SettingsTile(
                       leading: CircleAvatar(
                         backgroundColor: CycleColors.primary.withValues(alpha: 0.14),
                         child: const Icon(Icons.favorite_rounded, color: CycleColors.primary),
@@ -101,7 +103,7 @@ class SettingsScreen extends ConsumerWidget {
                       subtitle: Text('${profile?.memberUids.length ?? 0} anggota'),
                     ),
                     const Divider(height: 1),
-                    ListTile(
+                    _SettingsTile(
                       leading: CircleAvatar(
                         backgroundColor: CycleColors.accent.withValues(alpha: 0.14),
                         child: const Icon(Icons.group_add_rounded, color: CycleColors.accent),
@@ -131,37 +133,42 @@ class SettingsScreen extends ConsumerWidget {
                       children: [
                         const Icon(Icons.palette_outlined, size: 20, color: CycleColors.primary),
                         const SizedBox(width: 8),
-                        Text(
-                          'Tampilan Tema',
-                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                        Expanded(
+                          child: Text(
+                            'Tampilan Tema',
+                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
-                      child: SegmentedButton<ThemeMode>(
-                        segments: const [
-                          ButtonSegment(
-                            value: ThemeMode.system,
-                            icon: Icon(Icons.brightness_auto_rounded, size: 18),
-                            label: Text('Sistem'),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.light,
-                            icon: Icon(Icons.wb_sunny_outlined, size: 18),
-                            label: Text('Terang'),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.dark,
-                            icon: Icon(Icons.nightlight_round, size: 18),
-                            label: Text('Gelap'),
-                          ),
-                        ],
-                        selected: {themeMode},
-                        onSelectionChanged: (modes) {
-                          ref.read(themeModeProvider.notifier).state = modes.first;
-                        },
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: SegmentedButton<ThemeMode>(
+                          segments: const [
+                            ButtonSegment(
+                              value: ThemeMode.system,
+                              icon: Icon(Icons.brightness_auto_rounded, size: 18),
+                              label: Text('Sistem'),
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.light,
+                              icon: Icon(Icons.wb_sunny_outlined, size: 18),
+                              label: Text('Terang'),
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.dark,
+                              icon: Icon(Icons.nightlight_round, size: 18),
+                              label: Text('Gelap'),
+                            ),
+                          ],
+                          selected: {themeMode},
+                          onSelectionChanged: (modes) {
+                            ref.read(themeModeProvider.notifier).state = modes.first;
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -174,13 +181,13 @@ class SettingsScreen extends ConsumerWidget {
             Card(
               child: Column(
                 children: [
-                  ListTile(
+                  _SettingsTile(
                     leading: const Icon(Icons.email_outlined),
                     title: Text(user?.email ?? ''),
                     subtitle: const Text('Email Akun'),
                   ),
                   const Divider(height: 1),
-                  ListTile(
+                  _SettingsTile(
                     leading: Icon(Icons.logout_rounded, color: theme.colorScheme.error),
                     title: Text(
                       'Keluar',
@@ -205,7 +212,77 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
+        ),
       ),
     );
   }
 }
+
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
+    required this.leading,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+  });
+
+  final Widget leading;
+  final Widget title;
+  final Widget? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Flexible(
+              flex: 0,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: leading,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DefaultTextStyle.merge(
+                    style: theme.textTheme.bodyLarge,
+                    child: title,
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    DefaultTextStyle.merge(
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                      ),
+                      child: subtitle!,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (trailing != null) ...[
+              const SizedBox(width: 8),
+              Flexible(
+                flex: 0,
+                child: trailing!,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+

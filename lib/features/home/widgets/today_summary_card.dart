@@ -45,10 +45,12 @@ class TodaySummaryCard extends StatelessWidget {
                 color: CycleColors.primary,
               ),
               const SizedBox(width: 8),
-              Text(
-                'Ringkasan Hari Ini',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(
+                  'Ringkasan Hari Ini',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],

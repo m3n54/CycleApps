@@ -84,10 +84,12 @@ class SymptomsFrequencyCard extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Text(
-                'Frekuensi Gejala & Mood',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+              Expanded(
+                child: Text(
+                  'Frekuensi Gejala & Mood',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -173,17 +175,24 @@ class _FrequencyBarRow extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
+            Expanded(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-            Text(
-              '$count hari',
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: barColor,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                '$count hari',
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: barColor,
+                ),
               ),
             ),
           ],

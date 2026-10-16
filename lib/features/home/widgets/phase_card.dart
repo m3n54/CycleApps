@@ -75,25 +75,30 @@ class PhaseCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: phaseColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.bolt_rounded, size: 15, color: phaseColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      phaseInfo.energyLevel,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: phaseColor,
-                        fontWeight: FontWeight.w700,
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: phaseColor.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.bolt_rounded, size: 15, color: phaseColor),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          phaseInfo.energyLevel,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: phaseColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -151,10 +156,9 @@ class _RecommendationRow extends StatelessWidget {
           color: accentColor.withValues(alpha: 0.16),
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final badge = Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: accentColor.withValues(alpha: 0.12),
@@ -162,22 +166,38 @@ class _RecommendationRow extends StatelessWidget {
             ),
             child: Text(
               label,
+              overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: accentColor,
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              recommendation,
-              style: theme.textTheme.bodySmall?.copyWith(
-                height: 1.35,
-              ),
+          );
+          final desc = Text(
+            recommendation,
+            style: theme.textTheme.bodySmall?.copyWith(
+              height: 1.35,
             ),
-          ),
-        ],
+          );
+          if (constraints.maxWidth < 180) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                badge,
+                const SizedBox(height: 6),
+                desc,
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              badge,
+              const SizedBox(width: 10),
+              Expanded(child: desc),
+            ],
+          );
+        },
       ),
     );
   }

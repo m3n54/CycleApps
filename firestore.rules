@@ -35,14 +35,33 @@ service cloud.firestore {
 
       allow update: if signedIn() && (
         (request.auth.uid in resource.data.memberUids
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'defaultCycleLength', 'defaultPeriodLength']))
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'name',
+            'defaultCycleLength',
+            'defaultPeriodLength',
+            'activeSignal',
+            'signalUpdatedAt',
+            'signalReaction'
+          ]))
         || isValidJoin()
       );
 
       match /days/{date} {
         allow read, delete: if isMember(profileId);
         allow create, update: if isMember(profileId)
-          && request.resource.data.keys().hasOnly(['date', 'flow', 'symptoms', 'moods', 'energy', 'note', 'updatedBy', 'updatedAt'])
+          && request.resource.data.keys().hasOnly([
+            'date',
+            'flow',
+            'symptoms',
+            'moods',
+            'energy',
+            'cervicalMucus',
+            'sexualActivity',
+            'selfCareCompleted',
+            'note',
+            'updatedBy',
+            'updatedAt'
+          ])
           && request.resource.data.date == date
           && request.resource.data.updatedBy == request.auth.uid
           && request.resource.data.note is string

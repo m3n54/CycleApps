@@ -117,11 +117,16 @@ class _DayLogScreenState extends ConsumerState<DayLogScreen> {
     );
     // Tidak di-await: saat offline Future baru selesai setelah sinkron.
     unawaited(
-      ref.read(dayRepositoryProvider).saveDay(
+      ref
+          .read(dayRepositoryProvider)
+          .saveDay(
             profileId: profileId,
             uid: user.uid,
             entry: entry,
-          ),
+          )
+          .catchError((Object e) {
+        debugPrint('Gagal menyimpan catatan harian: $e');
+      }),
     );
     Navigator.of(context).pop();
   }

@@ -8,6 +8,7 @@ import '../../domain/day_entry.dart';
 import '../../domain/labels.dart';
 import '../../state/providers.dart';
 import '../../theme/cycle_theme.dart';
+import '../common/widgets/responsive_bounds.dart';
 import '../log/day_log_screen.dart';
 import 'day_marker.dart';
 import 'prediction_summary.dart';
@@ -54,9 +55,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Kalender Siklus')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-        children: [
+      body: ResponsiveBounds(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+          children: [
           // Prediction Summary Banner Card
           Container(
             padding: const EdgeInsets.all(16),
@@ -217,6 +219,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             ),
           ),
         ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: CycleColors.primary,

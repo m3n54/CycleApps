@@ -7,6 +7,7 @@ import '../../domain/date_key.dart';
 import '../../domain/day_entry.dart';
 import '../../state/providers.dart';
 import '../../theme/cycle_theme.dart';
+import '../common/widgets/responsive_bounds.dart';
 import '../log/day_log_screen.dart';
 import 'widgets/cycle_dial.dart';
 import 'widgets/phase_card.dart';
@@ -57,87 +58,90 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Custom Header
-              Text(
-                dateSubtitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-                  fontWeight: FontWeight.w600,
+        child: ResponsiveBounds(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Custom Header
+                Text(
+                  dateSubtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                greeting,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.4,
+                const SizedBox(height: 4),
+                Text(
+                  greeting,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Hero Cycle Dial
-              Center(
-                child: CycleDial(
-                  prediction: prediction,
-                  today: today,
+                // Hero Cycle Dial
+                Center(
+                  child: CycleDial(
+                    prediction: prediction,
+                    today: today,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Prominent Quick Log CTA Button
-              Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: const LinearGradient(
-                    colors: [
-                      CycleColors.primary,
-                      CycleColors.secondary,
+                // Prominent Quick Log CTA Button
+                Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      colors: [
+                        CycleColors.primary,
+                        CycleColors.secondary,
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: CycleColors.primary.withValues(alpha: 0.25),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: CycleColors.primary.withValues(alpha: 0.25),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                  ],
-                ),
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  onPressed: () => _openTodayLog(context, today),
-                  icon: const Icon(Icons.edit_calendar_rounded, color: Colors.white),
-                  label: const Text(
-                    'Catat Hari Ini',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    onPressed: () => _openTodayLog(context, today),
+                    icon: const Icon(Icons.edit_calendar_rounded, color: Colors.white),
+                    label: const Text(
+                      'Catat Hari Ini',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Daily Cycle Phase Status Card
-              PhaseCard(phaseInfo: phaseInfo),
-              const SizedBox(height: 14),
+                // Daily Cycle Phase Status Card
+                PhaseCard(phaseInfo: phaseInfo),
+                const SizedBox(height: 14),
 
-              // Today's Recorded Summary Card
-              TodaySummaryCard(entry: todayEntry),
-            ],
+                // Today's Recorded Summary Card
+                TodaySummaryCard(entry: todayEntry),
+              ],
+            ),
           ),
         ),
       ),

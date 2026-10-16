@@ -65,10 +65,12 @@ class CycleStatsCard extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Text(
-                'Statistik Siklus',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+              Expanded(
+                child: Text(
+                  'Statistik Siklus',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -212,17 +214,24 @@ class _PeriodHistoryRow extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              dateRange,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
+            Expanded(
+              child: Text(
+                dateRange,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-            Text(
-              '$lengthDays hari',
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: CycleColors.phaseMenstrual,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                '$lengthDays hari',
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: CycleColors.phaseMenstrual,
+                ),
               ),
             ),
           ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/auth/auth_gate.dart';
+import 'features/common/widgets/responsive_bounds.dart';
 import 'state/providers.dart';
 import 'theme/cycle_theme.dart';
 
@@ -17,6 +18,9 @@ class CycleApp extends ConsumerWidget {
       theme: CycleTheme.lightTheme,
       darkTheme: CycleTheme.darkTheme,
       themeMode: themeMode,
+      builder: (context, child) => ResponsiveBounds(
+        child: child ?? const SizedBox.shrink(),
+      ),
       home: const AuthGate(),
     );
   }

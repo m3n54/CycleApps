@@ -57,6 +57,8 @@ const day = (uid, extra = {}) => ({
   symptoms: [],
   moods: [],
   energy: null,
+  cervicalMucus: 'creamy',
+  sexualActivity: 'protected',
   note: '',
   updatedBy: uid,
   updatedAt: serverTimestamp(),

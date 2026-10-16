@@ -59,10 +59,12 @@ class _PhaseGuideSheetState extends State<PhaseGuideSheet> {
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              'Panduan 4 Fase Siklus',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
+            Expanded(
+              child: Text(
+                'Panduan 4 Fase Siklus',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ],
@@ -159,28 +161,33 @@ class _PhaseGuideCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: phaseColor.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.bolt_rounded, size: 14, color: phaseColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          info.energyLevel,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: phaseColor,
-                            fontWeight: FontWeight.w700,
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: phaseColor.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.bolt_rounded, size: 14, color: phaseColor),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              info.energyLevel,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: phaseColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: 4),
