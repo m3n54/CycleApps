@@ -1,7 +1,4 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-
-import '../../../theme/cycle_theme.dart';
 
 /// Konsep B: "Twin Ribbon Heart & Moon"
 /// Logo khas Siklus yang melambangkan keintiman dan harmoni pasangan:

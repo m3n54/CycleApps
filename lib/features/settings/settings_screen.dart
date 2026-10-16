@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/profile_repository.dart';
 import '../../state/providers.dart';
 import '../../state/update_controller.dart';
 import '../../theme/cycle_theme.dart';
@@ -67,7 +68,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Minta pasangan memasukkan kode ini di layar "Mulai". Berlaku 24 jam.',
+                'Minta pasangan memasukkan kode ini di layar "Mulai" atau di menu Pengaturan. Berlaku 24 jam.',
                 textAlign: TextAlign.center,
               ),
             ],
@@ -90,6 +91,149 @@ class SettingsScreen extends ConsumerWidget {
         const SnackBar(content: Text('Gagal membuat undangan. Pastikan terhubung ke internet.')),
       );
     }
+  }
+
+  Future<void> _joinWithCode(BuildContext context, WidgetRef ref) async {
+    final user = ref.read(authStateProvider).valueOrNull;
+    if (user == null) return;
+    final textController = TextEditingController();
+    var isSubmitting = false;
+    String? errorText;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: CycleColors.primary.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.link_rounded, color: CycleColors.primary, size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Gabung Profil Pasangan',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Masukkan 6 digit kode undangan dari pasangan Anda untuk menghubungkan akun.',
+                    style: TextStyle(fontSize: 13, height: 1.4),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    key: const Key('joinCodeInput'),
+                    controller: textController,
+                    autofocus: true,
+                    textCapitalization: TextCapitalization.characters,
+                    textAlign: TextAlign.center,
+                    maxLength: 6,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 6,
+                      color: CycleColors.primary,
+                    ),
+                    decoration: InputDecoration(
+                      counterText: '',
+                      hintText: 'KODE',
+                      hintStyle: TextStyle(
+                        letterSpacing: 4,
+                        color: Colors.grey.withValues(alpha: 0.5),
+                      ),
+                      errorText: errorText,
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onChanged: (_) {
+                      if (errorText != null) {
+                        setDialogState(() => errorText = null);
+                      }
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Batal'),
+                ),
+                FilledButton(
+                  key: const Key('submitJoinCodeBtn'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: CycleColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          final code = textController.text.trim();
+                          if (code.isEmpty) {
+                            setDialogState(() => errorText = 'Masukkan kode undangan');
+                            return;
+                          }
+                          setDialogState(() {
+                            isSubmitting = true;
+                            errorText = null;
+                          });
+                          try {
+                            await ref
+                                .read(profileRepositoryProvider)
+                                .joinWithCode(uid: user.uid, rawCode: code)
+                                .timeout(const Duration(seconds: 15));
+                            if (!dialogContext.mounted) return;
+                            Navigator.of(dialogContext).pop();
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('🎉 Berhasil terhubung dengan profil pasangan!'),
+                                ),
+                              );
+                            }
+                          } on JoinException catch (e) {
+                            setDialogState(() {
+                              isSubmitting = false;
+                              errorText = e.message;
+                            });
+                          } catch (_) {
+                            setDialogState(() {
+                              isSubmitting = false;
+                              errorText = 'Gagal terhubung. Pastikan internet aktif.';
+                            });
+                          }
+                        },
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Gabung', style: TextStyle(fontWeight: FontWeight.w700)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -144,7 +288,11 @@ class SettingsScreen extends ConsumerWidget {
                         profile?.name ?? '-',
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                       ),
-                      subtitle: Text('${profile?.memberUids.length ?? 0} anggota'),
+                      subtitle: Text(
+                        user != null && profile != null && profile.isOwner(user.uid)
+                            ? 'Pemilik Profil • ${profile.memberUids.length} anggota'
+                            : 'Mode Pasangan • ${profile?.memberUids.length ?? 0} anggota',
+                      ),
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
@@ -159,6 +307,20 @@ class SettingsScreen extends ConsumerWidget {
                       subtitle: const Text('Buat kode undangan (berlaku 24 jam)'),
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => _invite(context, ref),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      leading: CircleAvatar(
+                        backgroundColor: CycleColors.primary.withValues(alpha: 0.14),
+                        child: const Icon(Icons.link_rounded, color: CycleColors.primary),
+                      ),
+                      title: const Text(
+                        'Gabung dengan kode undangan',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: const Text('Masukkan kode dari pasangan untuk sinkronisasi'),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => _joinWithCode(context, ref),
                     ),
                   ],
                 ),
