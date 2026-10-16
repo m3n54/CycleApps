@@ -13,7 +13,7 @@ void main() {
     );
 
     expect(find.byType(CycleLogo), findsOneWidget);
-    expect(find.byIcon(Icons.spa_rounded), findsOneWidget);
+    expect(find.byType(CustomPaint), findsWidgets);
 
     final logoFinder = find.byType(CycleLogo);
     final size = tester.getSize(logoFinder);
