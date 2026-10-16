@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../domain/couple_care.dart';
 import '../domain/cycle_profile.dart';
 import 'invite_code.dart';
 
@@ -78,4 +79,16 @@ class ProfileRepository {
       ..set(_user(uid), {'activeProfileId': profileId}, SetOptions(merge: true));
     await batch.commit();
   }
+
+  Future<void> sendSignal({required String profileId, required CoupleSignal? signal}) =>
+      _profile(profileId).update({
+        'activeSignal': signal?.name,
+        'signalUpdatedAt': FieldValue.serverTimestamp(),
+        'signalReaction': null,
+      });
+
+  Future<void> sendReaction({required String profileId, required PartnerReaction? reaction}) =>
+      _profile(profileId).update({
+        'signalReaction': reaction?.name,
+      });
 }

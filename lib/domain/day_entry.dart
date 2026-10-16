@@ -19,6 +19,7 @@ class DayEntry {
     this.energy,
     this.cervicalMucus,
     this.sexualActivity,
+    this.selfCareCompleted = const {},
     this.note = '',
     this.updatedBy,
   });
@@ -30,6 +31,7 @@ class DayEntry {
   final Energy? energy;
   final CervicalMucus? cervicalMucus;
   final SexualActivity? sexualActivity;
+  final Set<String> selfCareCompleted;
   final String note;
   final String? updatedBy;
 
@@ -43,7 +45,33 @@ class DayEntry {
       energy == null &&
       cervicalMucus == null &&
       sexualActivity == null &&
+      selfCareCompleted.isEmpty &&
       note.trim().isEmpty;
+
+  DayEntry copyWith({
+    String? date,
+    FlowLevel? flow,
+    Set<Symptom>? symptoms,
+    Set<Mood>? moods,
+    Energy? energy,
+    CervicalMucus? cervicalMucus,
+    SexualActivity? sexualActivity,
+    Set<String>? selfCareCompleted,
+    String? note,
+    String? updatedBy,
+  }) =>
+      DayEntry(
+        date: date ?? this.date,
+        flow: flow ?? this.flow,
+        symptoms: symptoms ?? this.symptoms,
+        moods: moods ?? this.moods,
+        energy: energy ?? this.energy,
+        cervicalMucus: cervicalMucus ?? this.cervicalMucus,
+        sexualActivity: sexualActivity ?? this.sexualActivity,
+        selfCareCompleted: selfCareCompleted ?? this.selfCareCompleted,
+        note: note ?? this.note,
+        updatedBy: updatedBy ?? this.updatedBy,
+      );
 
   /// Tidak memuat updatedBy/updatedAt; keduanya diisi repository.
   Map<String, dynamic> toMap() => {
@@ -54,6 +82,7 @@ class DayEntry {
         'energy': energy?.name,
         'cervicalMucus': cervicalMucus?.name,
         'sexualActivity': sexualActivity?.name,
+        'selfCareCompleted': (selfCareCompleted.toList()..sort()),
         'note': note,
       };
 
@@ -65,6 +94,7 @@ class DayEntry {
         energy: _enumOrNull(Energy.values, map['energy']),
         cervicalMucus: _enumOrNull(CervicalMucus.values, map['cervicalMucus']),
         sexualActivity: _enumOrNull(SexualActivity.values, map['sexualActivity']),
+        selfCareCompleted: _stringSet(map['selfCareCompleted']),
         note: (map['note'] as String?) ?? '',
         updatedBy: map['updatedBy'] as String?,
       );
@@ -80,4 +110,9 @@ T? _enumOrNull<T extends Enum>(List<T> values, Object? name) {
 Set<T> _enumSet<T extends Enum>(List<T> values, Object? raw) {
   if (raw is! List) return <T>{};
   return raw.map((n) => _enumOrNull(values, n)).whereType<T>().toSet();
+}
+
+Set<String> _stringSet(Object? raw) {
+  if (raw is! List) return <String>{};
+  return raw.whereType<String>().toSet();
 }
