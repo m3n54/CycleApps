@@ -1,16 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../domain/couple_care.dart';
 import '../../domain/cycle_phase_info.dart';
 import '../../domain/date_key.dart';
 import '../../domain/day_entry.dart';
+import '../../domain/personal_care_advisor.dart';
 import '../../state/providers.dart';
 import '../../theme/cycle_theme.dart';
 import '../common/widgets/responsive_bounds.dart';
 import '../log/day_log_screen.dart';
+import 'widgets/body_explainer_card.dart';
+import 'widgets/couple_care_card.dart';
 import 'widgets/cycle_dial.dart';
 import 'widgets/phase_card.dart';
+import 'widgets/self_care_checklist_card.dart';
 import 'widgets/today_summary_card.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -32,28 +39,109 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  void _toggleSelfCareMission({
+    required WidgetRef ref,
+    required String? profileId,
+    required String? uid,
+    required String todayKey,
+    required DayEntry? todayEntry,
+    required String missionId,
+  }) {
+    if (profileId == null || uid == null) return;
+    final baseEntry = todayEntry ?? DayEntry(date: todayKey);
+    final updatedCompleted = {...baseEntry.selfCareCompleted};
+    if (updatedCompleted.contains(missionId)) {
+      updatedCompleted.remove(missionId);
+    } else {
+      updatedCompleted.add(missionId);
+    }
+    final nextEntry = baseEntry.copyWith(selfCareCompleted: updatedCompleted);
+    unawaited(
+      ref
+          .read(dayRepositoryProvider)
+          .saveDay(
+            profileId: profileId,
+            uid: uid,
+            entry: nextEntry,
+          )
+          .catchError((Object e) {
+        debugPrint('Gagal menyimpan checklist self-care: $e');
+      }),
+    );
+  }
+
+  void _sendCoupleSignal({
+    required WidgetRef ref,
+    required String? profileId,
+    required CoupleSignal? signal,
+  }) {
+    if (profileId == null) return;
+    unawaited(
+      ref
+          .read(profileRepositoryProvider)
+          .sendSignal(profileId: profileId, signal: signal)
+          .catchError((Object e) {
+        debugPrint('Gagal mengirim kode pasangan: $e');
+      }),
+    );
+  }
+
+  void _sendPartnerReaction({
+    required WidgetRef ref,
+    required String? profileId,
+    required PartnerReaction? reaction,
+  }) {
+    if (profileId == null) return;
+    unawaited(
+      ref
+          .read(profileRepositoryProvider)
+          .sendReaction(profileId: profileId, reaction: reaction)
+          .catchError((Object e) {
+        debugPrint('Gagal mengirim balasan pasangan: $e');
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final today = ref.watch(todayProvider);
+    final user = ref.watch(authStateProvider).valueOrNull;
+    final profileId = ref.watch(activeProfileIdProvider).valueOrNull;
     final profile = ref.watch(activeProfileProvider).valueOrNull;
     final entries = ref.watch(dayEntriesProvider).valueOrNull ?? const <DayEntry>[];
     final prediction = ref.watch(predictionProvider);
 
     final todayKey = dateKey(today);
+    final yesterdayKey = dateKey(addDays(today, -1));
     DayEntry? todayEntry;
+    DayEntry? yesterdayEntry;
     for (final entry in entries) {
       if (entry.date == todayKey) {
         todayEntry = entry;
-        break;
+      } else if (entry.date == yesterdayKey) {
+        yesterdayEntry = entry;
       }
     }
 
     final phase = prediction.currentPhase(today);
     final phaseInfo = CyclePhaseInfo.forPhase(phase);
 
+    final isPartner =
+        profile != null && user != null && !profile.isOwner(user.uid);
     final profileName = profile?.name.trim() ?? '';
-    final greeting = profileName.isEmpty ? 'Halo, Cantik' : 'Halo, $profileName';
+    final contextualGreeting = PersonalCareAdvisor.contextualGreeting(
+      profileName: profileName,
+      phase: phase,
+      todayEntry: todayEntry,
+      yesterdayEntry: yesterdayEntry,
+      isPartner: isPartner,
+    );
+    final bodyExplanation = PersonalCareAdvisor.explainToday(
+      phase: phase,
+      todayEntry: todayEntry,
+    );
+    final missions = PersonalCareAdvisor.missionsForPhase(phase);
     final dateSubtitle = _formatDate(today);
 
     return Scaffold(
@@ -74,10 +162,18 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  greeting,
+                  contextualGreeting.headline,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  contextualGreeting.message,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.78),
+                    height: 1.4,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -133,6 +229,49 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // Couple Care Card (Owner Signal Sender or Partner Guide & Reaction)
+                CoupleCareCard(
+                  isPartner: isPartner,
+                  partnerName: profileName,
+                  phase: phase,
+                  activeSignal: profile?.activeSignal,
+                  signalReaction: profile?.signalReaction,
+                  onSelectSignal: (signal) => _sendCoupleSignal(
+                    ref: ref,
+                    profileId: profileId ?? profile?.id,
+                    signal: signal,
+                  ),
+                  onSelectReaction: (reaction) => _sendPartnerReaction(
+                    ref: ref,
+                    profileId: profileId ?? profile?.id,
+                    reaction: reaction,
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Smart Body Explainer Card ("Kenapa Tubuhmu Merasa Begini?")
+                if (bodyExplanation != null) ...[
+                  BodyExplainerCard(explanation: bodyExplanation),
+                  const SizedBox(height: 14),
+                ],
+
+                // Daily Self-Care Checklist (3 Phase Micro-Missions)
+                if (!isPartner) ...[
+                  SelfCareChecklistCard(
+                    missions: missions,
+                    completedIds: todayEntry?.selfCareCompleted ?? const {},
+                    onToggleMission: (missionId) => _toggleSelfCareMission(
+                      ref: ref,
+                      profileId: profileId ?? profile?.id,
+                      uid: user?.uid,
+                      todayKey: todayKey,
+                      todayEntry: todayEntry,
+                      missionId: missionId,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
 
                 // Daily Cycle Phase Status Card
                 PhaseCard(phaseInfo: phaseInfo),

@@ -69,7 +69,7 @@ class PersonalCareAdvisor {
     }
 
     final headline =
-        trimmedName.isEmpty ? 'Halo, Cantik 🌸' : 'Halo, $trimmedName 🌸';
+        trimmedName.isEmpty ? 'Halo, Cantik' : 'Halo, $trimmedName';
 
     if (yesterdayEntry != null && yesterdayEntry.symptoms.isNotEmpty) {
       final symptomNames = yesterdayEntry.symptoms

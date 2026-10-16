@@ -17,7 +17,7 @@ void main() {
         yesterdayEntry: yesterday,
         isPartner: false,
       );
-      expect(greeting.headline, 'Halo, Nata 🌸');
+      expect(greeting.headline, 'Halo, Nata');
       expect(greeting.message.toLowerCase(), contains('kram'));
     });
 
@@ -26,7 +26,7 @@ void main() {
         profileName: '   ',
         phase: CyclePhase.follicular,
       );
-      expect(greeting.headline, 'Halo, Cantik 🌸');
+      expect(greeting.headline, 'Halo, Cantik');
       expect(greeting.message, isNotEmpty);
     });
 
@@ -40,7 +40,7 @@ void main() {
         phase: CyclePhase.luteal,
         yesterdayEntry: yesterday,
       );
-      expect(greeting.headline, 'Halo, Nata 🌸');
+      expect(greeting.headline, 'Halo, Nata');
       expect(greeting.message.toLowerCase(), contains('kemarin'));
     });
 
@@ -54,7 +54,7 @@ void main() {
         phase: CyclePhase.ovulation,
         todayEntry: today,
       );
-      expect(greeting.headline, 'Halo, Nata 🌸');
+      expect(greeting.headline, 'Halo, Nata');
       expect(greeting.message, isNotEmpty);
     });
 
