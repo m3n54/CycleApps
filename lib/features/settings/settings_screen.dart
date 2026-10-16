@@ -3,12 +3,33 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/providers.dart';
+import '../../state/update_controller.dart';
 import '../../theme/cycle_theme.dart';
 import '../calendar/prediction_summary.dart';
 import '../common/widgets/responsive_bounds.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
+
+  Future<void> _handleUpdateAction(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(appUpdateControllerProvider);
+    if (current.isBusy) return;
+
+    final notifier = ref.read(appUpdateControllerProvider.notifier);
+    final AppUpdateState nextState;
+    if (current.phase == AppUpdatePhase.updateAvailable) {
+      nextState = await notifier.downloadAndApplyPatch();
+    } else {
+      nextState = await notifier.checkForUpdates(manual: true);
+    }
+
+    if (!context.mounted) return;
+    if (nextState.statusMessage.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(nextState.statusMessage)),
+      );
+    }
+  }
 
   Future<void> _invite(BuildContext context, WidgetRef ref) async {
     final user = ref.read(authStateProvider).valueOrNull;
@@ -77,6 +98,29 @@ class SettingsScreen extends ConsumerWidget {
     final profile = ref.watch(activeProfileProvider).valueOrNull;
     final user = ref.watch(authStateProvider).valueOrNull;
     final themeMode = ref.watch(themeModeProvider);
+    final updateState = ref.watch(appUpdateControllerProvider);
+
+    final String updateActionTitle;
+    final String updateActionSubtitle;
+    if (updateState.phase == AppUpdatePhase.updateAvailable) {
+      updateActionTitle = 'Unduh Pembaruan Sekarang';
+      updateActionSubtitle =
+          'Ada fitur baru! Ketuk untuk memperbarui tanpa instal ulang.';
+    } else if (updateState.phase == AppUpdatePhase.restartRequired) {
+      updateActionTitle = 'Pembaruan Siap Diterapkan';
+      updateActionSubtitle =
+          'Tutup dan buka kembali aplikasi untuk menikmati versi terbaru.';
+    } else if (updateState.phase == AppUpdatePhase.downloading) {
+      updateActionTitle = 'Mengunduh Pembaruan...';
+      updateActionSubtitle = 'Mohon tunggu sebentar...';
+    } else if (updateState.phase == AppUpdatePhase.checking) {
+      updateActionTitle = 'Memeriksa Pembaruan...';
+      updateActionSubtitle = 'Menghubungi server pembaruan...';
+    } else {
+      updateActionTitle = 'Cek Pembaruan Aplikasi';
+      updateActionSubtitle =
+          'Periksa update terbaru secara instan tanpa hapus aplikasi';
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pengaturan & Profil')),
@@ -170,6 +214,57 @@ class SettingsScreen extends ConsumerWidget {
                           },
                         ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // App Update & Version Card (Shorebird OTA)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  children: [
+                    _SettingsTile(
+                      leading: CircleAvatar(
+                        backgroundColor: CycleColors.primary.withValues(alpha: 0.14),
+                        child: const Icon(
+                          Icons.verified_outlined,
+                          color: CycleColors.primary,
+                        ),
+                      ),
+                      title: const Text(
+                        'Versi Aplikasi Siklus',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(updateState.versionSubtitle),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      leading: CircleAvatar(
+                        backgroundColor: CycleColors.accent.withValues(alpha: 0.14),
+                        child: const Icon(
+                          Icons.system_update_rounded,
+                          color: CycleColors.accent,
+                        ),
+                      ),
+                      title: Text(
+                        updateActionTitle,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(updateActionSubtitle),
+                      trailing: updateState.isBusy
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.refresh_rounded),
+                      onTap: updateState.isBusy
+                          ? null
+                          : () => _handleUpdateAction(context, ref),
                     ),
                   ],
                 ),

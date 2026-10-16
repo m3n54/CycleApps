@@ -1,0 +1,7 @@
+# Salin file ini menjadi `android/key.properties` dan pastikan `siklus-release-key.jks`
+# berada di dalam folder `android/app/` agar tanda tangan APK selalu konsisten
+# dan update APK tidak pernah meminta uninstall.
+storePassword=GANTI_PASSWORD_STORE
+keyPassword=GANTI_PASSWORD_KEY
+keyAlias=siklus
+storeFile=siklus-release-key.jks

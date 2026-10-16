@@ -50,6 +50,8 @@ void main() {
 
   testWidgets('sign out clears the user', (tester) async {
     await pump(tester);
+    await tester.ensureVisible(find.text('Keluar'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Keluar'));
     await tester.pumpAndSettle();
     expect(auth.currentUser, isNull);

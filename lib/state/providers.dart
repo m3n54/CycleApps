@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/app_updater_service.dart';
 import '../data/auth_repository.dart';
 import '../data/day_repository.dart';
 import '../data/profile_repository.dart';
@@ -10,10 +11,19 @@ import '../domain/cycle_predictor.dart';
 import '../domain/cycle_profile.dart';
 import '../domain/date_key.dart';
 import '../domain/day_entry.dart';
+import 'update_controller.dart';
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
 final firestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
+
+final appUpdaterServiceProvider =
+    Provider<AppUpdaterService>((ref) => ShorebirdAppUpdaterService());
+
+final appUpdateControllerProvider =
+    StateNotifierProvider<AppUpdateController, AppUpdateState>(
+  (ref) => AppUpdateController(ref.watch(appUpdaterServiceProvider)),
+);
 
 /// Di-override di test. Catatan: tidak otomatis berganti saat lewat tengah malam (cukup untuk MVP).
 final todayProvider = Provider<DateTime>((ref) => dateOnly(DateTime.now()));

@@ -40,6 +40,7 @@ dependencies:
   flutter_riverpod: 2.6.1
   table_calendar: ^3.3.0
   intl: ^0.20.3
+  shorebird_code_push: ^2.0.7
 
 dev_dependencies:
   flutter_test:

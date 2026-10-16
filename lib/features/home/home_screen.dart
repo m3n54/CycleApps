@@ -19,6 +19,7 @@ import 'widgets/cycle_dial.dart';
 import 'widgets/phase_card.dart';
 import 'widgets/self_care_checklist_card.dart';
 import 'widgets/today_summary_card.dart';
+import 'widgets/update_banner_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -143,6 +144,7 @@ class HomeScreen extends ConsumerWidget {
     );
     final missions = PersonalCareAdvisor.missionsForPhase(phase);
     final dateSubtitle = _formatDate(today);
+    final updateState = ref.watch(appUpdateControllerProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -177,6 +179,19 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // OTA Update Banner (Shorebird Code Push)
+                UpdateBannerCard(
+                  updateState: updateState,
+                  onDownload: () => unawaited(
+                    ref
+                        .read(appUpdateControllerProvider.notifier)
+                        .downloadAndApplyPatch(),
+                  ),
+                  onDismiss: () => ref
+                      .read(appUpdateControllerProvider.notifier)
+                      .dismissBanner(),
+                ),
 
                 // Hero Cycle Dial
                 Center(
