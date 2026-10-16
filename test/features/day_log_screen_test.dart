@@ -5,7 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:siklus/features/log/day_log_screen.dart';
+import 'package:siklus/features/log/widgets/category_section.dart';
+import 'package:siklus/features/log/widgets/selectable_tile.dart';
 import 'package:siklus/state/providers.dart';
+import 'package:siklus/theme/cycle_theme.dart';
 
 void main() {
   late FakeFirebaseFirestore db;
@@ -17,7 +20,11 @@ void main() {
     auth = MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'u1', email: 'a@b.co'));
     db = FakeFirebaseFirestore();
     await db.doc('users/u1').set({'activeProfileId': 'p1'});
-    await db.doc('profiles/p1').set({'ownerUid': 'u1', 'memberUids': ['u1'], 'name': 'A'});
+    await db.doc('profiles/p1').set({
+      'ownerUid': 'u1',
+      'memberUids': ['u1'],
+      'name': 'A',
+    });
   });
 
   /// Layar awal memantau dayEntriesProvider agar data sudah dimuat sebelum DayLogScreen dibuka.
@@ -28,6 +35,7 @@ void main() {
         firestoreProvider.overrideWithValue(db),
       ],
       child: MaterialApp(
+        theme: CycleTheme.lightTheme,
         home: Consumer(builder: (context, ref, _) {
           final n = ref.watch(dayEntriesProvider).valueOrNull?.length;
           return Scaffold(
@@ -46,41 +54,86 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('saves flow, symptoms, mood, energy and note', (tester) async {
+  testWidgets('renders all 7 category sections and saves flow, energy, mood, symptoms, mucus, intimacy, and note',
+      (tester) async {
     await openLog(tester, expectedEntries: 0);
+
+    expect(find.text('Catatan 15 Oktober 2026'), findsOneWidget);
+    expect(find.byType(CategorySection), findsNWidgets(7));
+    expect(find.text('Aliran Darah'), findsOneWidget);
+    expect(find.text('Tingkat Energi'), findsOneWidget);
+    expect(find.text('Suasana Hati'), findsOneWidget);
+    expect(find.text('Gejala Tubuh'), findsOneWidget);
+    expect(find.text('Cairan Serviks'), findsOneWidget);
+    expect(find.text('Aktivitas Seksual'), findsOneWidget);
+    expect(find.text('Catatan Harian'), findsOneWidget);
+
     await tester.tap(find.text('Sedang'));
-    await tester.tap(find.text('Kram'));
-    await tester.ensureVisible(find.text('Cemas'));
-    await tester.tap(find.text('Cemas'));
+    await tester.pump();
+
     await tester.ensureVisible(find.text('Lemas'));
     await tester.tap(find.text('Lemas'));
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Cemas'));
+    await tester.tap(find.text('Cemas'));
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Kram'));
+    await tester.tap(find.text('Kram'));
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Bening & Licin'));
+    await tester.tap(find.text('Bening & Licin'));
+    await tester.pump();
+
+    await tester.ensureVisible(find.text('Dengan Pengaman'));
+    await tester.tap(find.text('Dengan Pengaman'));
+    await tester.pump();
+
     await tester.ensureVisible(find.byKey(const Key('note')));
     await tester.enterText(find.byKey(const Key('note')), 'perut sakit');
-    await tester.tap(find.text('Simpan'));
+    await tester.pump();
+
+    await tester.tap(find.text('Simpan Catatan'));
     await tester.pumpAndSettle();
 
     final data = (await db.doc('profiles/p1/days/2026-10-15').get()).data()!;
     expect(data['flow'], 'medium');
-    expect(data['symptoms'], ['cramps']);
-    expect(data['moods'], ['anxious']);
     expect(data['energy'], 'low');
+    expect(data['moods'], ['anxious']);
+    expect(data['symptoms'], ['cramps']);
+    expect(data['cervicalMucus'], 'eggWhite');
+    expect(data['sexualActivity'], 'protected');
     expect(data['note'], 'perut sakit');
     expect(data['updatedBy'], 'u1');
-    expect(find.text('buka 1'), findsOneWidget); // kembali ke layar sebelumnya
+    expect(find.text('buka 1'), findsOneWidget);
   });
 
-  testWidgets('prefills existing entry and tapping a selected chip clears it', (tester) async {
+  testWidgets('prefills existing entry and tapping a selected tile clears it', (tester) async {
     await db.doc('profiles/p1/days/2026-10-15').set({
-      'date': '2026-10-15', 'flow': 'heavy', 'symptoms': <String>[], 'moods': <String>[],
-      'energy': null, 'note': '', 'updatedBy': 'u1',
+      'date': '2026-10-15',
+      'flow': 'heavy',
+      'symptoms': <String>[],
+      'moods': <String>[],
+      'energy': null,
+      'cervicalMucus': null,
+      'sexualActivity': null,
+      'note': '',
+      'updatedBy': 'u1',
     });
     await openLog(tester, expectedEntries: 1);
-    final heavy = tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Berat'));
-    expect(heavy.selected, isTrue);
 
-    await tester.tap(find.text('Berat')); // batalkan pilihan → entri kosong
-    await tester.tap(find.text('Simpan'));
+    final heavyTile = tester.widget<SelectableTile>(
+      find.widgetWithText(SelectableTile, 'Deras'),
+    );
+    expect(heavyTile.selected, isTrue);
+
+    await tester.tap(find.text('Deras'));
+    await tester.pump();
+    await tester.tap(find.text('Simpan Catatan'));
     await tester.pumpAndSettle();
+
     expect((await db.doc('profiles/p1/days/2026-10-15').get()).exists, isFalse);
   });
 }
