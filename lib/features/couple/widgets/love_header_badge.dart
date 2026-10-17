@@ -50,11 +50,12 @@ class _LoveHeaderBadgeState extends ConsumerState<LoveHeaderBadge>
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).valueOrNull;
     final isOwner = widget.profile.isOwner(user?.uid);
+    final myInitial = switch (user?.displayName) {
+      final name? when name.isNotEmpty => name[0].toUpperCase(),
+      _ when isOwner && widget.profile.name.isNotEmpty => widget.profile.name[0].toUpperCase(),
+      _ => isOwner ? 'K' : 'A',
+    };
     final partnerName = isOwner ? 'Pasangan' : widget.profile.name;
-    final myInitial = (user?.displayName?.isNotEmpty == true
-            ? user!.displayName![0]
-            : (isOwner ? widget.profile.name.isNotEmpty ? widget.profile.name[0] : 'K' : 'A'))
-        .toUpperCase();
     final partnerInitial = (partnerName.isNotEmpty ? partnerName[0] : 'P').toUpperCase();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;

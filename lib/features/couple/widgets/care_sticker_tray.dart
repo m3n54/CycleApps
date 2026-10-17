@@ -58,9 +58,11 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
     if (_isSending) return;
 
     final user = ref.read(authStateProvider).valueOrNull;
-    final isOwner = widget.profile.isOwner(user?.uid);
-    final senderName = user?.displayName?.isNotEmpty == true
-        ? user!.displayName!
+    if (user == null) return;
+
+    final isOwner = widget.profile.isOwner(user.uid);
+    final senderName = user.displayName?.isNotEmpty == true
+        ? user.displayName!
         : (isOwner ? widget.profile.name : 'Pasangan');
 
     final note = _noteController.text.trim();
@@ -70,7 +72,7 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
     try {
       await ref.read(profileRepositoryProvider).sendInteraction(
             profileId: widget.profile.id,
-            senderUid: user?.uid ?? '',
+            senderUid: user.uid,
             senderName: senderName,
             emoji: sticker.emoji,
             text: sticker.text,

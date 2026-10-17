@@ -112,7 +112,7 @@ class LoveTimelineCard extends ConsumerWidget {
                     ? CycleColors.primary.withValues(alpha: 0.15)
                     : CycleColors.secondary.withValues(alpha: 0.15),
                 child: Text(
-                  isMe ? 'Kamu'[0] : (interaction.senderName.isNotEmpty ? interaction.senderName[0] : 'P'),
+                  isMe ? 'K' : (interaction.senderName.isNotEmpty ? interaction.senderName[0] : 'P'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,

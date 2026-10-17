@@ -106,9 +106,10 @@ class CoupleSpaceScreen extends ConsumerWidget {
     var isSubmitting = false;
     String? errorText;
 
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
             return AlertDialog(
@@ -223,6 +224,9 @@ class CoupleSpaceScreen extends ConsumerWidget {
         );
       },
     );
+    } finally {
+      textController.dispose();
+    }
   }
 
   @override
