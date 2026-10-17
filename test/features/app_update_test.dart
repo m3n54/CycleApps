@@ -16,17 +16,22 @@ class FakeAppUpdaterService implements AppUpdaterService {
     this.available = true,
     this.currentPatch = 1,
     this.nextPatch,
+    this.releaseInfo,
     this.status = UpdateStatus.upToDate,
   });
 
   bool available;
   int? currentPatch;
   int? nextPatch;
+  AppReleaseInfo? releaseInfo;
   UpdateStatus status;
   int downloadCalls = 0;
 
   @override
   bool get isAvailable => available;
+
+  @override
+  AppReleaseInfo? get latestReleaseInfo => releaseInfo;
 
   @override
   Future<int?> readCurrentPatchNumber() async => currentPatch;
@@ -38,8 +43,10 @@ class FakeAppUpdaterService implements AppUpdaterService {
   Future<UpdateStatus> checkForUpdate() async => status;
 
   @override
-  Future<void> downloadUpdate() async {
+  Future<void> downloadUpdate({void Function(int progress)? onProgress}) async {
     downloadCalls++;
+    onProgress?.call(50);
+    onProgress?.call(100);
     nextPatch = (currentPatch ?? 0) + 1;
     status = UpdateStatus.restartRequired;
   }
@@ -52,6 +59,12 @@ void main() {
       final fakeUpdater = FakeAppUpdaterService(
         available: true,
         currentPatch: 2,
+        releaseInfo: const AppReleaseInfo(
+          versionCode: 3,
+          versionName: '1.0.2',
+          releaseNotes: 'Fitur baru dan perbaikan stabilitas.',
+          downloadUrl: 'https://example.com/app.apk',
+        ),
         status: UpdateStatus.outdated,
       );
 
@@ -84,14 +97,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(UpdateBannerCard), findsOneWidget);
-      expect(find.textContaining('Pembaruan Siklus Tersedia'), findsOneWidget);
-      expect(find.text('Perbarui Sekarang'), findsOneWidget);
+      expect(find.textContaining('Pembaruan Siklus v1.0.2 Tersedia'), findsWidgets);
+      expect(find.text('Perbarui Sekarang'), findsWidgets);
 
-      await tester.tap(find.text('Perbarui Sekarang'));
+      await tester.tap(find.text('Perbarui Sekarang').last);
       await tester.pumpAndSettle();
 
       expect(fakeUpdater.downloadCalls, 1);
-      expect(find.textContaining('Pembaruan Siap Digunakan!'), findsOneWidget);
+      expect(find.textContaining('Pembaruan Siap Dipasang!'), findsOneWidget);
     },
   );
 
@@ -130,7 +143,7 @@ void main() {
 
       expect(find.text('Versi Aplikasi Siklus'), findsOneWidget);
       expect(
-        find.text('Versi 1.0.0+1 • Patch #3 (Auto-Update Aktif)'),
+        find.text('Versi 1.0.1 • Patch #3 (Auto-Update Aktif)'),
         findsOneWidget,
       );
       expect(find.text('Cek Pembaruan Aplikasi'), findsOneWidget);
@@ -139,7 +152,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Aplikasi Siklus sudah menggunakan versi terbaru.'),
+        find.textContaining('sudah menggunakan versi terbaru'),
         findsOneWidget,
       );
     },

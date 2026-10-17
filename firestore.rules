@@ -84,5 +84,9 @@ service cloud.firestore {
         && isMember(request.resource.data.profileId);
       allow delete: if signedIn() && resource.data.createdBy == request.auth.uid;
     }
+
+    match /app_config/{document=**} {
+      allow read: if true;
+    }
   }
 }

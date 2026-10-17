@@ -30,16 +30,22 @@ class UpdateBannerCard extends StatelessWidget {
     final String subtitle;
     if (isDownloading) {
       title = '⏳ Mengunduh Pembaruan...';
-      subtitle =
-          'Mohon tunggu sebentar, fitur terbaru sedang diunduh di latar belakang.';
+      subtitle = updateState.downloadProgress > 0
+          ? 'Sedang mengunduh APK (${updateState.downloadProgress}%). Installer akan terbuka otomatis.'
+          : 'Menghubungkan ke server pembaruan...';
     } else if (isRestartRequired) {
-      title = '🎉 Pembaruan Siap Digunakan!';
+      title = '🎉 Pembaruan Siap Dipasang!';
       subtitle =
-          'Tutup dan buka kembali aplikasi Siklus untuk menerapkan fitur terbaru.';
+          'File update selesai diunduh. Ketuk tombol untuk membuka jendela pemasangan Android.';
     } else {
-      title = '✨ Pembaruan Siklus Tersedia';
-      subtitle =
-          'Ada peningkatan & fitur baru untuk kalian berdua. Unduh instan tanpa perlu instal ulang.';
+      final versionName = updateState.releaseInfo?.versionName;
+      title = versionName != null
+          ? '✨ Pembaruan Siklus v$versionName Tersedia'
+          : '✨ Pembaruan Siklus Tersedia';
+      subtitle = updateState.releaseInfo?.releaseNotes != null &&
+              updateState.releaseInfo!.releaseNotes.trim().isNotEmpty
+          ? updateState.releaseInfo!.releaseNotes
+          : 'Ada peningkatan & fitur baru untuk kalian berdua. Unduh instan tanpa perlu kirim file manual.';
     }
 
     return Container(
@@ -112,11 +118,35 @@ class UpdateBannerCard extends StatelessWidget {
           ),
           if (isDownloading) ...[
             const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Mengunduh...',
+                  style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  '${updateState.downloadProgress}%',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: CycleColors.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: const LinearProgressIndicator(minHeight: 6),
+              child: LinearProgressIndicator(
+                value: updateState.downloadProgress > 0
+                    ? updateState.downloadProgress / 100
+                    : null,
+                minHeight: 6,
+                backgroundColor: CycleColors.primary.withValues(alpha: 0.15),
+                color: CycleColors.primary,
+              ),
             ),
-          ] else if (!isRestartRequired) ...[
+          ] else ...[
             const SizedBox(height: 10),
             Align(
               alignment: Alignment.centerRight,
@@ -130,10 +160,13 @@ class UpdateBannerCard extends StatelessWidget {
                   ),
                 ),
                 onPressed: onDownload,
-                icon: const Icon(Icons.download_rounded, size: 16),
-                label: const Text(
-                  'Perbarui Sekarang',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                icon: Icon(
+                  isRestartRequired ? Icons.install_mobile_rounded : Icons.download_rounded,
+                  size: 16,
+                ),
+                label: Text(
+                  isRestartRequired ? 'Pasang Sekarang' : 'Perbarui Sekarang',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ),

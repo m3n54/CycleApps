@@ -11,6 +11,7 @@ import '../../domain/date_key.dart';
 import '../../domain/day_entry.dart';
 import '../../domain/personal_care_advisor.dart';
 import '../../state/providers.dart';
+import '../../state/update_controller.dart';
 import '../../theme/cycle_theme.dart';
 import '../common/widgets/responsive_bounds.dart';
 import '../couple/couple_space_screen.dart';
@@ -21,6 +22,7 @@ import 'widgets/cycle_dial.dart';
 import 'widgets/phase_card.dart';
 import 'widgets/self_care_checklist_card.dart';
 import 'widgets/today_summary_card.dart';
+import 'widgets/in_app_update_dialog.dart';
 import 'widgets/update_banner_card.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -156,6 +158,31 @@ class HomeScreen extends ConsumerWidget {
     final missions = PersonalCareAdvisor.missionsForPhase(phase);
     final dateSubtitle = _formatDate(today);
     final updateState = ref.watch(appUpdateControllerProvider);
+
+    ref.listen<AppUpdateState>(appUpdateControllerProvider, (previous, next) {
+      if (previous?.phase != AppUpdatePhase.updateAvailable &&
+          next.phase == AppUpdatePhase.updateAvailable &&
+          !next.bannerDismissed) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            unawaited(
+              InAppUpdateDialog.showIfAvailable(
+                context: context,
+                updateState: next,
+                onDownload: () => unawaited(
+                  ref
+                      .read(appUpdateControllerProvider.notifier)
+                      .downloadAndApplyPatch(),
+                ),
+                onDismiss: () => ref
+                    .read(appUpdateControllerProvider.notifier)
+                    .dismissBanner(),
+              ),
+            );
+          }
+        });
+      }
+    });
 
     // Incoming love interaction banner
     CoupleInteraction? incomingLove;

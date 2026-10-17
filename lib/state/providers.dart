@@ -18,8 +18,15 @@ final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
 final firestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
 
-final appUpdaterServiceProvider =
-    Provider<AppUpdaterService>((ref) => ShorebirdAppUpdaterService());
+final appUpdaterServiceProvider = Provider<AppUpdaterService>((ref) {
+  FirebaseFirestore? firestore;
+  try {
+    firestore = ref.watch(firestoreProvider);
+  } catch (_) {
+    firestore = null;
+  }
+  return CombinedAppUpdaterService(firestore: firestore);
+});
 
 final appUpdateControllerProvider =
     StateNotifierProvider<AppUpdateController, AppUpdateState>(

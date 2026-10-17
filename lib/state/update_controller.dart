@@ -22,6 +22,8 @@ class AppUpdateState {
     this.isShorebirdAvailable = false,
     this.currentPatchNumber,
     this.nextPatchNumber,
+    this.releaseInfo,
+    this.downloadProgress = 0,
     this.phase = AppUpdatePhase.idle,
     this.bannerDismissed = false,
     this.statusMessage = '',
@@ -31,6 +33,8 @@ class AppUpdateState {
   final bool isShorebirdAvailable;
   final int? currentPatchNumber;
   final int? nextPatchNumber;
+  final AppReleaseInfo? releaseInfo;
+  final int downloadProgress;
   final AppUpdatePhase phase;
   final bool bannerDismissed;
   final String statusMessage;
@@ -45,13 +49,13 @@ class AppUpdateState {
           phase == AppUpdatePhase.restartRequired);
 
   String get versionSubtitle {
-    if (!isShorebirdAvailable) {
-      return 'Versi $version • Mode Standar / Web';
+    if (releaseInfo != null) {
+      return 'Versi $version • Pembaruan v${releaseInfo!.versionName} Tersedia';
     }
     if (currentPatchNumber != null) {
       return 'Versi $version • Patch #$currentPatchNumber (Auto-Update Aktif)';
     }
-    return 'Versi $version • Rilis Dasar (Auto-Update Aktif)';
+    return 'Versi $version • Auto-Update Aktif';
   }
 
   AppUpdateState copyWith({
@@ -61,6 +65,9 @@ class AppUpdateState {
     bool clearCurrentPatch = false,
     int? nextPatchNumber,
     bool clearNextPatch = false,
+    AppReleaseInfo? releaseInfo,
+    bool clearReleaseInfo = false,
+    int? downloadProgress,
     AppUpdatePhase? phase,
     bool? bannerDismissed,
     String? statusMessage,
@@ -73,6 +80,10 @@ class AppUpdateState {
           : (currentPatchNumber ?? this.currentPatchNumber),
       nextPatchNumber:
           clearNextPatch ? null : (nextPatchNumber ?? this.nextPatchNumber),
+      releaseInfo: clearReleaseInfo
+          ? null
+          : (releaseInfo ?? this.releaseInfo),
+      downloadProgress: downloadProgress ?? this.downloadProgress,
       phase: phase ?? this.phase,
       bannerDismissed: bannerDismissed ?? this.bannerDismissed,
       statusMessage: statusMessage ?? this.statusMessage,
@@ -99,8 +110,7 @@ class AppUpdateController extends StateNotifier<AppUpdateState> {
       state = state.copyWith(
         isShorebirdAvailable: false,
         phase: AppUpdatePhase.unavailable,
-        statusMessage:
-            'Auto-update OTA aktif otomatis pada APK Rilis Shorebird.',
+        statusMessage: 'Pengecekan pembaruan tidak aktif pada platform ini.',
       );
       return;
     }
@@ -125,8 +135,7 @@ class AppUpdateController extends StateNotifier<AppUpdateState> {
       state = state.copyWith(
         isShorebirdAvailable: false,
         phase: AppUpdatePhase.unavailable,
-        statusMessage:
-            'Aplikasi berjalan di mode Web/Standar. Fitur OTA aktif saat di-build dengan Shorebird.',
+        statusMessage: 'Pengecekan pembaruan tidak aktif pada platform ini.',
       );
       return state;
     }
@@ -142,6 +151,7 @@ class AppUpdateController extends StateNotifier<AppUpdateState> {
       final currentPatch = await _service.readCurrentPatchNumber();
       final status = await _service.checkForUpdate();
       final nextPatch = await _service.readNextPatchNumber();
+      final releaseInfo = _service.latestReleaseInfo;
       if (!mounted) return state;
 
       switch (status) {
@@ -149,41 +159,43 @@ class AppUpdateController extends StateNotifier<AppUpdateState> {
           state = state.copyWith(
             currentPatchNumber: currentPatch,
             nextPatchNumber: nextPatch,
+            releaseInfo: releaseInfo,
             phase: AppUpdatePhase.updateAvailable,
             bannerDismissed: manual ? false : state.bannerDismissed,
-            statusMessage:
-                'Ada pembaruan fitur Siklus baru yang siap diunduh!',
+            statusMessage: releaseInfo != null
+                ? 'Versi ${releaseInfo.versionName} siap diunduh! 🌸'
+                : 'Ada pembaruan fitur Siklus baru yang siap diunduh!',
           );
         case UpdateStatus.restartRequired:
           state = state.copyWith(
             currentPatchNumber: currentPatch,
             nextPatchNumber: nextPatch,
+            releaseInfo: releaseInfo,
             phase: AppUpdatePhase.restartRequired,
             bannerDismissed: manual ? false : state.bannerDismissed,
             statusMessage:
-                'Pembaruan sudah siap! Tutup & buka kembali aplikasi untuk menerapkan.',
+                'Pembaruan siap! Buka instalasi untuk memperbarui.',
           );
         case UpdateStatus.upToDate:
           state = state.copyWith(
             currentPatchNumber: currentPatch,
             nextPatchNumber: nextPatch,
+            clearReleaseInfo: true,
             phase: AppUpdatePhase.upToDate,
-            statusMessage: 'Aplikasi Siklus sudah menggunakan versi terbaru.',
+            statusMessage: 'Aplikasi Siklus sudah menggunakan versi terbaru (v${state.version}).',
           );
         case UpdateStatus.unavailable:
           state = state.copyWith(
             currentPatchNumber: currentPatch,
             phase: AppUpdatePhase.unavailable,
-            statusMessage:
-                'Layanan pembaruan belum tersedia pada perangkat ini.',
+            statusMessage: 'Layanan pembaruan belum tersedia pada perangkat ini.',
           );
       }
     } catch (_) {
       if (!mounted) return state;
       state = state.copyWith(
         phase: AppUpdatePhase.error,
-        statusMessage:
-            'Gagal memeriksa pembaruan. Pastikan koneksi internet stabil.',
+        statusMessage: 'Gagal memeriksa pembaruan. Pastikan koneksi internet stabil.',
       );
     }
     return state;
@@ -195,26 +207,35 @@ class AppUpdateController extends StateNotifier<AppUpdateState> {
 
     state = state.copyWith(
       phase: AppUpdatePhase.downloading,
+      downloadProgress: 0,
       bannerDismissed: false,
       statusMessage: 'Mengunduh pembaruan fitur terbaru...',
     );
 
     try {
-      await _service.downloadUpdate();
+      await _service.downloadUpdate(
+        onProgress: (progress) {
+          if (!mounted) return;
+          state = state.copyWith(
+            downloadProgress: progress,
+            statusMessage: 'Mengunduh pembaruan ($progress%)...',
+          );
+        },
+      );
       final nextPatch = await _service.readNextPatchNumber();
       if (!mounted) return state;
       state = state.copyWith(
         nextPatchNumber: nextPatch,
+        downloadProgress: 100,
         phase: AppUpdatePhase.restartRequired,
         statusMessage:
-            'Pembaruan selesai diunduh! Buka ulang aplikasi untuk menerapkan fitur baru.',
+            'Pembaruan selesai diunduh! Pemasangan sedang dibuka...',
       );
     } catch (_) {
       if (!mounted) return state;
       state = state.copyWith(
         phase: AppUpdatePhase.error,
-        statusMessage:
-            'Gagal mengunduh pembaruan. Coba lagi beberapa saat lagi.',
+        statusMessage: 'Gagal mengunduh pembaruan. Coba lagi beberapa saat lagi.',
       );
     }
     return state;
