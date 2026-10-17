@@ -9,6 +9,7 @@ import '../data/day_repository.dart';
 import '../data/profile_repository.dart';
 import '../domain/cycle_predictor.dart';
 import '../domain/cycle_profile.dart';
+import '../domain/couple_interaction.dart';
 import '../domain/date_key.dart';
 import '../domain/day_entry.dart';
 import 'update_controller.dart';
@@ -65,4 +66,17 @@ final predictionProvider = Provider<CyclePrediction>((ref) {
     defaultCycleLength: profile?.defaultCycleLength ?? 28,
     defaultPeriodLength: profile?.defaultPeriodLength ?? 5,
   );
+});
+
+final coupleInteractionsProvider = StreamProvider<List<CoupleInteraction>>((ref) {
+  final id = ref.watch(activeProfileIdProvider).valueOrNull;
+  if (id == null) return Stream.value(const <CoupleInteraction>[]);
+  return ref.watch(profileRepositoryProvider).watchInteractions(id);
+});
+
+final unreadCoupleInteractionsCountProvider = Provider<int>((ref) {
+  final interactions = ref.watch(coupleInteractionsProvider).valueOrNull ?? const <CoupleInteraction>[];
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return 0;
+  return interactions.where((i) => !i.isRead && i.senderUid != user.uid).length;
 });
