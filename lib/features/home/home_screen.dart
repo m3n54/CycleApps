@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/couple_care.dart';
+import '../../domain/couple_interaction.dart';
 import '../../domain/cycle_phase_info.dart';
 import '../../domain/date_key.dart';
 import '../../domain/day_entry.dart';
@@ -12,6 +13,7 @@ import '../../domain/personal_care_advisor.dart';
 import '../../state/providers.dart';
 import '../../theme/cycle_theme.dart';
 import '../common/widgets/responsive_bounds.dart';
+import '../couple/couple_space_screen.dart';
 import '../log/day_log_screen.dart';
 import 'widgets/body_explainer_card.dart';
 import 'widgets/couple_care_card.dart';
@@ -36,6 +38,14 @@ class HomeScreen extends ConsumerWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => DayLogScreen(date: today),
+      ),
+    );
+  }
+
+  void _openCoupleSpace(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const CoupleSpaceScreen(),
       ),
     );
   }
@@ -112,6 +122,7 @@ class HomeScreen extends ConsumerWidget {
     final profile = ref.watch(activeProfileProvider).valueOrNull;
     final entries = ref.watch(dayEntriesProvider).valueOrNull ?? const <DayEntry>[];
     final prediction = ref.watch(predictionProvider);
+    final interactions = ref.watch(coupleInteractionsProvider).valueOrNull ?? const <CoupleInteraction>[];
 
     final todayKey = dateKey(today);
     final yesterdayKey = dateKey(addDays(today, -1));
@@ -145,6 +156,20 @@ class HomeScreen extends ConsumerWidget {
     final missions = PersonalCareAdvisor.missionsForPhase(phase);
     final dateSubtitle = _formatDate(today);
     final updateState = ref.watch(appUpdateControllerProvider);
+
+    // Incoming love interaction banner
+    CoupleInteraction? incomingLove;
+    for (final interaction in interactions) {
+      if (interaction.senderUid != user?.uid) {
+        final isUnreplied = !interaction.isRead || interaction.repliedAt == null;
+        final isRecent = DateTime.now().difference(interaction.createdAt).inHours.abs() < 24 ||
+            today.difference(interaction.createdAt).inHours.abs() < 24;
+        if (isUnreplied || isRecent) {
+          incomingLove = interaction;
+        }
+        break;
+      }
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -180,6 +205,58 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
+                // Top banner for incoming love interaction
+                if (incomingLove != null) ...[
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          CycleColors.primary.withValues(alpha: 0.12),
+                          CycleColors.secondary.withValues(alpha: 0.18),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: CycleColors.primary.withValues(alpha: 0.3),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => _openCoupleSpace(context),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '💌 ${incomingLove.senderName} baru saja mengirim: ${incomingLove.emoji} ${incomingLove.text} (Ketuk untuk membalas)',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: theme.colorScheme.onSurface,
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 14,
+                                color: CycleColors.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+
                 // OTA Update Banner (Shorebird Code Push)
                 UpdateBannerCard(
                   updateState: updateState,
@@ -202,48 +279,94 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Prominent Quick Log CTA Button
-                Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: const LinearGradient(
-                      colors: [
-                        CycleColors.primary,
-                        CycleColors.secondary,
+                // Differentiated Primary CTA Button
+                if (isPartner) ...[
+                  Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        colors: [
+                          CycleColors.primary,
+                          CycleColors.secondary,
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CycleColors.primary.withValues(alpha: 0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
                       ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: CycleColors.primary.withValues(alpha: 0.25),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                    child: ElevatedButton.icon(
+                      key: const Key('partnerSendLoveBtn'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    onPressed: () => _openTodayLog(context, today),
-                    icon: const Icon(Icons.edit_calendar_rounded, color: Colors.white),
-                    label: const Text(
-                      'Catat Hari Ini',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                      onPressed: () => _openCoupleSpace(context),
+                      icon: const Icon(Icons.favorite_rounded, color: Colors.white),
+                      label: Text(
+                        'Kirim Perhatian ke ${profileName.isEmpty ? 'Pasangan' : profileName} 💖',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
+                ] else ...[
+                  // Prominent Quick Log CTA Button for Owner
+                  Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        colors: [
+                          CycleColors.primary,
+                          CycleColors.secondary,
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CycleColors.primary.withValues(alpha: 0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () => _openTodayLog(context, today),
+                      icon: const Icon(Icons.edit_calendar_rounded, color: Colors.white),
+                      label: const Text(
+                        'Catat Hari Ini',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
                 // Couple Care Card (Owner Signal Sender or Partner Guide & Reaction)
                 CoupleCareCard(

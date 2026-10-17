@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../domain/day_entry.dart';
 import '../../../domain/labels.dart';
 import '../../../theme/cycle_theme.dart';
+import '../../insights/insights_screen.dart';
 
 class TodaySummaryCard extends StatelessWidget {
   const TodaySummaryCard({
@@ -118,6 +119,38 @@ class TodaySummaryCard extends StatelessWidget {
               ),
             ],
           ],
+          const SizedBox(height: 14),
+          Divider(
+            height: 1,
+            color: borderColor.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 6),
+          Center(
+            child: TextButton.icon(
+              key: const Key('viewInsightsButton'),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const InsightsScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.insights_rounded,
+                size: 18,
+                color: CycleColors.primary,
+              ),
+              label: const Text(
+                'Lihat Analisis & Grafik Siklus Lengkap 📈',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: CycleColors.primary,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
