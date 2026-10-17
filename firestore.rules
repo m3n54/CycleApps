@@ -41,7 +41,9 @@ service cloud.firestore {
             'defaultPeriodLength',
             'activeSignal',
             'signalUpdatedAt',
-            'signalReaction'
+            'signalReaction',
+            'customStickers',
+            'lastInteraction'
           ]))
         || isValidJoin()
       );
@@ -68,6 +70,10 @@ service cloud.firestore {
           && request.resource.data.note.size() <= 2000
           && request.resource.data.symptoms is list
           && request.resource.data.moods is list;
+      }
+
+      match /interactions/{interactionId} {
+        allow read, write: if isMember(profileId);
       }
     }
 

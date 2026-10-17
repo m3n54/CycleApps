@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../domain/couple_care.dart';
+import '../domain/couple_interaction.dart';
 import '../domain/cycle_profile.dart';
 import 'invite_code.dart';
 
@@ -91,4 +92,121 @@ class ProfileRepository {
       _profile(profileId).update({
         'signalReaction': reaction?.name,
       });
+
+  Stream<List<CoupleInteraction>> watchInteractions(String profileId, {int limit = 50}) {
+    return _db
+        .collection('profiles')
+        .doc(profileId)
+        .collection('interactions')
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CoupleInteraction.fromMap(doc.id, doc.data()))
+            .toList());
+  }
+
+  Future<String> sendInteraction({
+    required String profileId,
+    required String senderUid,
+    required String senderName,
+    required String emoji,
+    required String text,
+    String? customNote,
+    DateTime? now,
+  }) async {
+    final interactionRef = _db
+        .collection('profiles')
+        .doc(profileId)
+        .collection('interactions')
+        .doc();
+    final timestamp = (now ?? DateTime.now()).toIso8601String();
+    final interactionMap = <String, dynamic>{
+      'senderUid': senderUid,
+      'senderName': senderName,
+      'emoji': emoji,
+      'text': text,
+      'customNote': customNote,
+      'replyEmoji': null,
+      'replyText': null,
+      'repliedAt': null,
+      'createdAt': timestamp,
+      'isRead': false,
+    };
+    final lastInteractionMap = <String, dynamic>{
+      'id': interactionRef.id,
+      'senderUid': senderUid,
+      'senderName': senderName,
+      'emoji': emoji,
+      'text': text,
+      'customNote': ?customNote,
+      'createdAt': timestamp,
+    };
+
+    final batch = _db.batch()
+      ..set(interactionRef, interactionMap)
+      ..update(_profile(profileId), {
+        'lastInteraction': lastInteractionMap,
+      });
+    await batch.commit();
+
+    return interactionRef.id;
+  }
+
+  Future<void> replyInteraction({
+    required String profileId,
+    required String interactionId,
+    required String replyEmoji,
+    required String replyText,
+    DateTime? now,
+  }) async {
+    final repliedAtStr = (now ?? DateTime.now()).toIso8601String();
+    final interactionRef = _db
+        .collection('profiles')
+        .doc(profileId)
+        .collection('interactions')
+        .doc(interactionId);
+    await interactionRef.update({
+      'replyEmoji': replyEmoji,
+      'replyText': replyText,
+      'repliedAt': repliedAtStr,
+      'isRead': true,
+    });
+
+    try {
+      final profileDoc = await _profile(profileId).get();
+      final lastInteraction = profileDoc.data()?['lastInteraction'];
+      if (lastInteraction is Map && lastInteraction['id'] == interactionId) {
+        final updated = Map<String, dynamic>.from(lastInteraction)
+          ..['replyEmoji'] = replyEmoji
+          ..['replyText'] = replyText
+          ..['repliedAt'] = repliedAtStr;
+        await _profile(profileId).update({'lastInteraction': updated});
+      }
+    } catch (_) {
+      // Best effort update on cached lastInteraction in profile doc
+    }
+  }
+
+  Future<void> addCustomSticker({
+    required String profileId,
+    required CustomCoupleSticker sticker,
+  }) =>
+      _profile(profileId).update({
+        'customStickers': FieldValue.arrayUnion([sticker.toMap()]),
+      });
+
+  Future<void> deleteCustomSticker({
+    required String profileId,
+    required String stickerId,
+  }) async {
+    final doc = await _profile(profileId).get();
+    final list = List<Map<String, dynamic>>.from(
+      (doc.data()?['customStickers'] as List? ?? const [])
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e)),
+    );
+    list.removeWhere((item) => item['id'] == stickerId);
+    await _profile(profileId).update({'customStickers': list});
+  }
 }

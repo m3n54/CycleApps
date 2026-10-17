@@ -1,3 +1,4 @@
+import 'couple_interaction.dart';
 import 'cycle_phase.dart';
 
 enum CoupleSignal {
@@ -31,6 +32,96 @@ class PartnerPhaseTip {
 
 class CoupleCareCatalog {
   const CoupleCareCatalog._();
+
+  static const List<CustomCoupleSticker> defaultCareStickers = [
+    CustomCoupleSticker(
+      id: 'default_care_1',
+      emoji: '🧸',
+      text: 'Puk-puk kepala & peluk eratt 🤗',
+      isReply: false,
+    ),
+    CustomCoupleSticker(
+      id: 'default_care_2',
+      emoji: '🧋',
+      text: 'Boba favorit meluncuurr! 🛵💨',
+      isReply: false,
+    ),
+    CustomCoupleSticker(
+      id: 'default_care_3',
+      emoji: '💆‍♂️',
+      text: 'Sesi pijat punggung & bahu siap! ✨',
+      isReply: false,
+    ),
+    CustomCoupleSticker(
+      id: 'default_care_4',
+      emoji: '👂',
+      text: 'Aku pasang telinga, mau curhat apa sayaang? 🥺',
+      isReply: false,
+    ),
+    CustomCoupleSticker(
+      id: 'default_care_5',
+      emoji: '🍫',
+      text: 'Camilan manis anti-badmood buat kamu 🍫💖',
+      isReply: false,
+    ),
+    CustomCoupleSticker(
+      id: 'default_care_6',
+      emoji: '🧸',
+      text: 'Kompres hangat udah siap di kasur 🛋️',
+      isReply: false,
+    ),
+    CustomCoupleSticker(
+      id: 'default_care_7',
+      emoji: '💤',
+      text: 'Tidur yuk, jangan begadang cantikk 😴',
+      isReply: false,
+    ),
+    CustomCoupleSticker(
+      id: 'default_care_8',
+      emoji: '🥺',
+      text: 'Cepat pulang yaa, kangeen bangett 🥺',
+      isReply: false,
+    ),
+  ];
+
+  static const List<CustomCoupleSticker> defaultReplyStickers = [
+    CustomCoupleSticker(
+      id: 'default_reply_1',
+      emoji: '🧋',
+      text: 'Benerannn mawuuuu 🧋✨',
+      isReply: true,
+    ),
+    CustomCoupleSticker(
+      id: 'default_reply_2',
+      emoji: '🥺',
+      text: 'aaaaa mauu ditemenin 🥺👉👈',
+      isReply: true,
+    ),
+    CustomCoupleSticker(
+      id: 'default_reply_3',
+      emoji: '💖',
+      text: 'Loveee youu soo muchh 💖🥹',
+      isReply: true,
+    ),
+    CustomCoupleSticker(
+      id: 'default_reply_4',
+      emoji: '🥰',
+      text: 'Makasih banyaakk sayangkuuu 🥰',
+      isReply: true,
+    ),
+    CustomCoupleSticker(
+      id: 'default_reply_5',
+      emoji: '🛌',
+      text: 'Mode mager parah, usap-usap duluu 🦥',
+      isReply: true,
+    ),
+    CustomCoupleSticker(
+      id: 'default_reply_6',
+      emoji: '🌸',
+      text: 'Hatiku langsung adem denger ini 🌸',
+      isReply: true,
+    ),
+  ];
 
   static String signalLabel(CoupleSignal signal) {
     switch (signal) {
