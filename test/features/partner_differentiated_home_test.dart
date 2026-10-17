@@ -234,4 +234,97 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.textContaining('Kirim Perhatian'), findsOneWidget);
   });
+
+  testWidgets('Replied love interaction does NOT show top banner', (tester) async {
+    final db = FakeFirebaseFirestore();
+    final partnerUser = MockUser(uid: 'u2', email: 'partner@example.com');
+
+    final interaction = CoupleInteraction(
+      id: 'i1',
+      senderUid: 'u1',
+      senderName: 'Nata',
+      emoji: '🧸',
+      text: 'Peluk erat dari jauh 🤗',
+      createdAt: DateTime(2026, 10, 17, 10, 0),
+      isRead: true,
+      repliedAt: DateTime(2026, 10, 17, 10, 5),
+      replyEmoji: '🍫',
+      replyText: 'Makasih sayang',
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          todayProvider.overrideWithValue(DateTime(2026, 10, 17)),
+          firestoreProvider.overrideWithValue(db),
+          activeProfileIdProvider.overrideWith((ref) => Stream.value('p1')),
+          activeProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              const CycleProfile(
+                id: 'p1',
+                name: 'Nata',
+                ownerUid: 'u1',
+                memberUids: ['u1', 'u2'],
+              ),
+            ),
+          ),
+          coupleInteractionsProvider.overrideWith((ref) => Stream.value([interaction])),
+          dayEntriesProvider.overrideWith((ref) => Stream.value(const <DayEntry>[])),
+          authStateProvider.overrideWith((ref) => Stream.value(partnerUser)),
+        ],
+        child: MaterialApp(
+          theme: CycleTheme.lightTheme,
+          home: const HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('baru saja mengirim:'), findsNothing);
+  });
+
+  testWidgets('Incoming unread love interaction with empty senderName falls back to Pasangan', (tester) async {
+    final db = FakeFirebaseFirestore();
+    final partnerUser = MockUser(uid: 'u2', email: 'partner@example.com');
+
+    final interaction = CoupleInteraction(
+      id: 'i1',
+      senderUid: 'u1',
+      senderName: '   ',
+      emoji: '🧸',
+      text: 'Peluk erat',
+      createdAt: DateTime(2026, 10, 17, 10, 0),
+      isRead: false,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          todayProvider.overrideWithValue(DateTime(2026, 10, 17)),
+          firestoreProvider.overrideWithValue(db),
+          activeProfileIdProvider.overrideWith((ref) => Stream.value('p1')),
+          activeProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              const CycleProfile(
+                id: 'p1',
+                name: 'Nata',
+                ownerUid: 'u1',
+                memberUids: ['u1', 'u2'],
+              ),
+            ),
+          ),
+          coupleInteractionsProvider.overrideWith((ref) => Stream.value([interaction])),
+          dayEntriesProvider.overrideWith((ref) => Stream.value(const <DayEntry>[])),
+          authStateProvider.overrideWith((ref) => Stream.value(partnerUser)),
+        ],
+        child: MaterialApp(
+          theme: CycleTheme.lightTheme,
+          home: const HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Pasangan baru saja mengirim:'), findsOneWidget);
+  });
 }

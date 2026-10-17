@@ -160,16 +160,22 @@ class HomeScreen extends ConsumerWidget {
     // Incoming love interaction banner
     CoupleInteraction? incomingLove;
     for (final interaction in interactions) {
-      if (interaction.senderUid != user?.uid) {
+      if (user != null && interaction.senderUid != user.uid) {
         final isUnreplied = !interaction.isRead || interaction.repliedAt == null;
         final isRecent = DateTime.now().difference(interaction.createdAt).inHours.abs() < 24 ||
             today.difference(interaction.createdAt).inHours.abs() < 24;
-        if (isUnreplied || isRecent) {
+        if (isUnreplied && isRecent) {
           incomingLove = interaction;
         }
         break;
       }
     }
+
+    final loveSenderDisplayName = incomingLove == null
+        ? ''
+        : (incomingLove.senderName.trim().isEmpty
+            ? 'Pasangan'
+            : incomingLove.senderName.trim());
 
     return Scaffold(
       body: SafeArea(
@@ -235,7 +241,7 @@ class HomeScreen extends ConsumerWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  '💌 ${incomingLove.senderName} baru saja mengirim: ${incomingLove.emoji} ${incomingLove.text} (Ketuk untuk membalas)',
+                                  '💌 $loveSenderDisplayName baru saja mengirim: ${incomingLove.emoji} ${incomingLove.text} (Ketuk untuk membalas)',
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: theme.colorScheme.onSurface,
