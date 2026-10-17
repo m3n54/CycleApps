@@ -77,4 +77,31 @@ void main() {
     list = profileDoc.data()?['customStickers'] as List?;
     expect(list?.isEmpty, isTrue);
   });
+
+  test('watchInteractions streams interaction documents ordered by createdAt descending', () async {
+    final stream = repo.watchInteractions('p1');
+    final initialList = await stream.first;
+    expect(initialList.isEmpty, isTrue);
+
+    await repo.sendInteraction(
+      profileId: 'p1',
+      senderUid: 'u2',
+      senderName: 'Menza',
+      emoji: '🧋',
+      text: 'Pesan 1',
+    );
+    await repo.sendInteraction(
+      profileId: 'p1',
+      senderUid: 'u1',
+      senderName: 'Nata',
+      emoji: '🧸',
+      text: 'Pesan 2',
+    );
+
+    final updatedList = await repo.watchInteractions('p1').first;
+    expect(updatedList.length, 2);
+    expect(updatedList.first.text, 'Pesan 2');
+    expect(updatedList.last.text, 'Pesan 1');
+  });
 }
+
