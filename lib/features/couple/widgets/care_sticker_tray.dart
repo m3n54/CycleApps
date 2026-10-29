@@ -61,9 +61,12 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
     if (user == null) return;
 
     final isOwner = widget.profile.isOwner(user.uid);
+    final partnerFallback = widget.profile.partnerName.trim().isNotEmpty
+        ? widget.profile.partnerName.trim()
+        : 'Pasangan';
     final senderName = user.displayName?.isNotEmpty == true
         ? user.displayName!
-        : (isOwner ? widget.profile.name : 'Pasangan');
+        : (isOwner ? widget.profile.name : partnerFallback);
 
     final note = _noteController.text.trim();
 
@@ -114,9 +117,12 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
     if (user == null) return;
 
     final isOwner = widget.profile.isOwner(user.uid);
+    final partnerFallback = widget.profile.partnerName.trim().isNotEmpty
+        ? widget.profile.partnerName.trim()
+        : 'Pasangan';
     final senderName = user.displayName?.isNotEmpty == true
         ? user.displayName!
-        : (isOwner ? widget.profile.name : 'Pasangan');
+        : (isOwner ? widget.profile.name : partnerFallback);
 
     setState(() => _isSending = true);
 
@@ -219,6 +225,7 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(authStateProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final customCareStickers =

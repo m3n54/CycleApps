@@ -221,10 +221,14 @@ class ProfileRepository {
 
   Future<void> updateCoupleMetadata({
     required String profileId,
+    String? name,
     String? partnerName,
     DateTime? anniversaryDate,
   }) {
     final updates = <String, dynamic>{};
+    if (name != null) {
+      updates['name'] = name.trim();
+    }
     if (partnerName != null) {
       updates['partnerName'] = partnerName.trim();
     }
@@ -234,6 +238,7 @@ class ProfileRepository {
       final d = anniversaryDate.day.toString().padLeft(2, '0');
       updates['anniversaryDate'] = '$y-$m-$d';
     }
+    if (updates.isEmpty) return Future.value();
     return _profile(profileId).update(updates);
   }
 

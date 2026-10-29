@@ -49,124 +49,137 @@ class _LoveHeaderBadgeState extends ConsumerState<LoveHeaderBadge>
 
   Future<void> _openCoupleMetadataDialog(BuildContext context) async {
     final today = ref.read(todayProvider);
+    final user = ref.read(authStateProvider).valueOrNull;
+    final isOwner = widget.profile.isOwner(user?.uid);
     final nameController = TextEditingController(text: widget.profile.partnerName);
     DateTime? selectedDate = widget.profile.anniversaryDate;
 
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final formattedDate = selectedDate != null
-              ? '${selectedDate!.day.toString().padLeft(2, '0')}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.year}'
-              : 'Pilih Tanggal Jadian';
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => StatefulBuilder(
+          builder: (context, setDialogState) {
+            final formattedDate = selectedDate != null
+                ? '${selectedDate!.day.toString().padLeft(2, '0')}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.year}'
+                : 'Pilih Tanggal Jadian';
 
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Row(
-              children: [
-                Text('💕', style: TextStyle(fontSize: 22)),
-                SizedBox(width: 8),
-                Text(
-                  'Profil Pasangan',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-              ],
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+            final nameFieldLabel =
+                isOwner ? 'Nama Panggilan Pasangan' : 'Nama Panggilan Kamu';
+            final nameFieldHint =
+                isOwner ? 'Misal: Menza / Ayang' : 'Misal: Menza';
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: const Row(
                 children: [
-                  const Text(
-                    'Nama Panggilan Pasangan',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  TextField(
-                    key: const Key('partnerNameInput'),
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      hintText: 'Misal: Menza / Ayang',
-                      prefixIcon: const Icon(Icons.favorite_rounded, color: CycleColors.primary, size: 18),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Tanggal Jadian / Hari Bersama',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  InkWell(
-                    key: const Key('pickAnniversaryDateBtn'),
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate ?? today,
-                        firstDate: DateTime(1970),
-                        lastDate: today,
-                      );
-                      if (picked != null) {
-                        setDialogState(() => selectedDate = picked);
-                      }
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.withValues(alpha: 0.4)),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_today_rounded, size: 18, color: CycleColors.primary),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              formattedDate,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: selectedDate != null ? null : Colors.grey,
-                              ),
-                            ),
-                          ),
-                          const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                        ],
-                      ),
-                    ),
+                  Text('💕', style: TextStyle(fontSize: 22)),
+                  SizedBox(width: 8),
+                  Text(
+                    'Profil Pasangan',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                 ],
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Batal'),
-              ),
-              FilledButton(
-                key: const Key('saveCoupleMetadataBtn'),
-                onPressed: () async {
-                  await ref.read(profileRepositoryProvider).updateCoupleMetadata(
-                        profileId: widget.profile.id,
-                        partnerName: nameController.text.trim(),
-                        anniversaryDate: selectedDate,
-                      );
-                  if (ctx.mounted) {
-                    Navigator.pop(ctx);
-                  }
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: CycleColors.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nameFieldLabel,
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      key: const Key('partnerNameInput'),
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        hintText: nameFieldHint,
+                        prefixIcon: const Icon(Icons.favorite_rounded, color: CycleColors.primary, size: 18),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Tanggal Jadian / Hari Bersama',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 6),
+                    InkWell(
+                      key: const Key('pickAnniversaryDateBtn'),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate ?? today,
+                          firstDate: DateTime(1970),
+                          lastDate: today,
+                        );
+                        if (picked != null) {
+                          setDialogState(() => selectedDate = picked);
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.withValues(alpha: 0.4)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_today_rounded, size: 18, color: CycleColors.primary),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                formattedDate,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: selectedDate != null ? null : Colors.grey,
+                                ),
+                              ),
+                            ),
+                            const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                child: const Text('Simpan'),
               ),
-            ],
-          );
-        },
-      ),
-    );
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Batal'),
+                ),
+                FilledButton(
+                  key: const Key('saveCoupleMetadataBtn'),
+                  onPressed: () async {
+                    FocusScope.of(ctx).unfocus();
+                    await ref.read(profileRepositoryProvider).updateCoupleMetadata(
+                          profileId: widget.profile.id,
+                          partnerName: nameController.text.trim(),
+                          anniversaryDate: selectedDate,
+                        );
+                    if (ctx.mounted) {
+                      Navigator.pop(ctx);
+                    }
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: CycleColors.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Simpan'),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+    } finally {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      nameController.dispose();
+    }
   }
 
   @override
