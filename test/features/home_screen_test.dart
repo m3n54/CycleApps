@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:siklus/features/home/home_screen.dart';
 import 'package:siklus/features/home/widgets/cycle_dial.dart';
+import 'package:siklus/features/home/widgets/mascot_companion_card.dart';
 import 'package:siklus/features/home/widgets/phase_card.dart';
 import 'package:siklus/features/home/widgets/today_summary_card.dart';
 import 'package:siklus/features/log/day_log_screen.dart';
@@ -53,6 +54,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(CycleDial), findsOneWidget);
+    expect(find.byType(MascotCompanionCard), findsOneWidget);
     expect(find.byType(PhaseCard), findsOneWidget);
     expect(find.byType(TodaySummaryCard), findsOneWidget);
     expect(find.text('Catat Hari Ini'), findsOneWidget);
@@ -112,5 +114,24 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(DayLogScreen), findsOneWidget);
+  });
+
+  testWidgets('changing mascot on HomeScreen updates profile in Firestore', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MascotCompanionCard), findsOneWidget);
+    expect(find.textContaining('Mochi Kitten'), findsOneWidget);
+
+    // Open mascot picker
+    await tester.tap(find.byKey(const Key('changeMascotButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Baby Dino'), findsOneWidget);
+    await tester.tap(find.text('Baby Dino'));
+    await tester.pumpAndSettle();
+
+    final profileSnap = await db.doc('profiles/p1').get();
+    expect(profileSnap.data()?['selectedMascot'], 'babyDino');
   });
 }

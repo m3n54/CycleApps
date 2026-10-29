@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../domain/couple_care.dart';
 import '../../domain/couple_interaction.dart';
+import '../../domain/cycle_mascot.dart';
 import '../../domain/cycle_phase_info.dart';
 import '../../domain/date_key.dart';
 import '../../domain/day_entry.dart';
@@ -19,6 +20,7 @@ import '../log/day_log_screen.dart';
 import 'widgets/body_explainer_card.dart';
 import 'widgets/couple_care_card.dart';
 import 'widgets/cycle_dial.dart';
+import 'widgets/mascot_companion_card.dart';
 import 'widgets/phase_card.dart';
 import 'widgets/self_care_checklist_card.dart';
 import 'widgets/today_summary_card.dart';
@@ -111,6 +113,22 @@ class HomeScreen extends ConsumerWidget {
           .sendReaction(profileId: profileId, reaction: reaction)
           .catchError((Object e) {
         debugPrint('Gagal mengirim balasan pasangan: $e');
+      }),
+    );
+  }
+
+  void _updateMascot({
+    required WidgetRef ref,
+    required String? profileId,
+    required MascotCharacter mascot,
+  }) {
+    if (profileId == null) return;
+    unawaited(
+      ref
+          .read(profileRepositoryProvider)
+          .updateMascot(profileId: profileId, mascot: mascot)
+          .catchError((Object e) {
+        debugPrint('Gagal mengubah maskot: $e');
       }),
     );
   }
@@ -302,6 +320,21 @@ class HomeScreen extends ConsumerWidget {
                       .read(appUpdateControllerProvider.notifier)
                       .dismissBanner(),
                 ),
+
+                // Mascot Companion Card
+                MascotCompanionCard(
+                  character: profile?.selectedMascot ?? MascotCharacter.mochiKitten,
+                  phase: phase,
+                  todayEntry: todayEntry,
+                  isPartner: isPartner,
+                  partnerName: profileName,
+                  onSelectMascot: (mascot) => _updateMascot(
+                    ref: ref,
+                    profileId: profileId ?? profile?.id,
+                    mascot: mascot,
+                  ),
+                ),
+                const SizedBox(height: 16),
 
                 // Hero Cycle Dial
                 Center(
