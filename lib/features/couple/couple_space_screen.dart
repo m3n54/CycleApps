@@ -360,6 +360,18 @@ class CoupleSpaceScreen extends ConsumerWidget {
   ) {
     final interactionsAsync = ref.watch(coupleInteractionsProvider);
     final interactions = interactionsAsync.valueOrNull ?? const [];
+    final user = ref.watch(authStateProvider).valueOrNull ?? ref.watch(firebaseAuthProvider).currentUser;
+
+    final hasUnreadIncoming = user != null &&
+        interactions.any((i) => !i.isRead && i.senderUid != user.uid);
+    if (hasUnreadIncoming) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(profileRepositoryProvider).markInteractionsAsRead(
+              profileId: profile.id,
+              readerUid: user.uid,
+            );
+      });
+    }
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

@@ -70,6 +70,8 @@ void main() {
 
     // Tap quick reply button on the card
     expect(find.textContaining('Benerannn mawuuuu'), findsOneWidget);
+    await tester.drag(find.byType(ListView).first, const Offset(0, -200));
+    await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Benerannn mawuuuu'));
     await tester.pumpAndSettle();
 
@@ -352,5 +354,227 @@ void main() {
     expect(find.byType(LoveHeaderBadge), findsOneWidget);
     expect(find.byType(CareStickerTray), findsOneWidget);
     expect(find.byType(LoveTimelineCard), findsOneWidget);
+  });
+
+  testWidgets('LoveHeaderBadge displays anniversary days together and care streak', (tester) async {
+    await db.collection('profiles/p1/interactions').doc('i_streak').set({
+      'senderUid': 'u1',
+      'senderName': 'Nata',
+      'emoji': '🧋',
+      'text': 'Boba favorit',
+      'createdAt': DateTime(2026, 10, 29, 9, 0).toIso8601String(),
+      'isRead': false,
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          todayProvider.overrideWithValue(DateTime(2026, 10, 29)),
+          firebaseAuthProvider.overrideWithValue(auth),
+          firestoreProvider.overrideWithValue(db),
+          activeProfileIdProvider.overrideWith((ref) => Stream.value('p1')),
+          activeProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              CycleProfile(
+                id: 'p1',
+                name: 'Nata',
+                partnerName: 'Menza',
+                ownerUid: 'u1',
+                memberUids: const ['u1', 'u2'],
+                anniversaryDate: DateTime(2026, 10, 20),
+              ),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: CycleTheme.lightTheme,
+          home: const CoupleSpaceScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('10 Hari Bersama'), findsOneWidget);
+    expect(find.textContaining('1 Hari Streak'), findsOneWidget);
+  });
+
+  testWidgets('CareStickerTray allows sending standalone love note via send button', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          firebaseAuthProvider.overrideWithValue(auth),
+          firestoreProvider.overrideWithValue(db),
+          activeProfileIdProvider.overrideWith((ref) => Stream.value('p1')),
+          activeProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              const CycleProfile(
+                id: 'p1',
+                name: 'Nata',
+                partnerName: 'Menza',
+                ownerUid: 'u1',
+                memberUids: ['u1', 'u2'],
+              ),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: CycleTheme.lightTheme,
+          home: const CoupleSpaceScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('quickLoveNoteInput')),
+      'Semangat kerjanya hari ini sayang!',
+    );
+    await tester.tap(find.byKey(const Key('sendQuickNoteBtn')));
+    await tester.pumpAndSettle();
+
+    final interactions = await db.collection('profiles/p1/interactions').get();
+    expect(interactions.docs.length, 1);
+    expect(interactions.docs.first.data()['text'], 'Semangat kerjanya hari ini sayang!');
+    expect(interactions.docs.first.data()['emoji'], '💌');
+  });
+
+  testWidgets('CareStickerTray allows deleting custom sticker', (tester) async {
+    await db.doc('profiles/p1').set({
+      'name': 'Nata',
+      'ownerUid': 'u1',
+      'memberUids': ['u1', 'u2'],
+      'customStickers': [
+        {
+          'id': 'custom_love_1',
+          'emoji': '🍦',
+          'text': 'Es krim date',
+          'isReply': false,
+        }
+      ],
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          firebaseAuthProvider.overrideWithValue(auth),
+          firestoreProvider.overrideWithValue(db),
+          activeProfileIdProvider.overrideWith((ref) => Stream.value('p1')),
+          activeProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              const CycleProfile(
+                id: 'p1',
+                name: 'Nata',
+                ownerUid: 'u1',
+                memberUids: ['u1', 'u2'],
+                customStickers: [
+                  CustomCoupleSticker(
+                    id: 'custom_love_1',
+                    emoji: '🍦',
+                    text: 'Es krim date',
+                    isReply: false,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: CycleTheme.lightTheme,
+          home: const CoupleSpaceScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('sticker_chip_custom_love_1')), findsOneWidget);
+
+    await tester.longPress(find.byKey(const Key('sticker_chip_custom_love_1')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Hapus Stiker'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('confirmDeleteSticker_custom_love_1')));
+    await tester.pumpAndSettle();
+
+    final profileDoc = await db.doc('profiles/p1').get();
+    final customStickers = profileDoc.data()?['customStickers'] as List?;
+    expect(customStickers, isEmpty);
+  });
+
+  testWidgets('CoupleSpaceScreen automatically marks incoming unread interactions as read', (tester) async {
+    await db.collection('profiles/p1/interactions').doc('i_unread').set({
+      'senderUid': 'u1',
+      'senderName': 'Nata',
+      'emoji': '🧸',
+      'text': 'Peluk hangat',
+      'createdAt': DateTime(2026, 10, 29, 9, 0).toIso8601String(),
+      'isRead': false,
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          firebaseAuthProvider.overrideWithValue(auth),
+          firestoreProvider.overrideWithValue(db),
+          activeProfileIdProvider.overrideWith((ref) => Stream.value('p1')),
+          activeProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              const CycleProfile(
+                id: 'p1',
+                name: 'Nata',
+                ownerUid: 'u1',
+                memberUids: ['u1', 'u2'],
+              ),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: CycleTheme.lightTheme,
+          home: const CoupleSpaceScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final doc = await db.collection('profiles/p1/interactions').doc('i_unread').get();
+    expect(doc.data()?['isRead'], isTrue);
+  });
+
+  testWidgets('LoveHeaderBadge opens couple metadata dialog and updates partner name', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          todayProvider.overrideWithValue(DateTime(2026, 10, 29)),
+          firebaseAuthProvider.overrideWithValue(auth),
+          firestoreProvider.overrideWithValue(db),
+          activeProfileIdProvider.overrideWith((ref) => Stream.value('p1')),
+          activeProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              const CycleProfile(
+                id: 'p1',
+                name: 'Nata',
+                ownerUid: 'u1',
+                memberUids: ['u1', 'u2'],
+              ),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: CycleTheme.lightTheme,
+          home: const CoupleSpaceScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('editCoupleMetadataBtn')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('partnerNameInput')), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('partnerNameInput')), 'Menza');
+    await tester.tap(find.byKey(const Key('saveCoupleMetadataBtn')));
+    await tester.pumpAndSettle();
+
+    final profileDoc = await db.doc('profiles/p1').get();
+    expect(profileDoc.data()?['partnerName'], 'Menza');
   });
 }

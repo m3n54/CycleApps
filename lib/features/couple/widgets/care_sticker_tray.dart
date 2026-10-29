@@ -106,6 +106,107 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
     }
   }
 
+  Future<void> _sendStandaloneNote() async {
+    final note = _noteController.text.trim();
+    if (note.isEmpty || _isSending) return;
+
+    final user = ref.read(authStateProvider).valueOrNull;
+    if (user == null) return;
+
+    final isOwner = widget.profile.isOwner(user.uid);
+    final senderName = user.displayName?.isNotEmpty == true
+        ? user.displayName!
+        : (isOwner ? widget.profile.name : 'Pasangan');
+
+    setState(() => _isSending = true);
+
+    try {
+      await ref.read(profileRepositoryProvider).sendInteraction(
+            profileId: widget.profile.id,
+            senderUid: user.uid,
+            senderName: senderName,
+            emoji: '💌',
+            text: note,
+            customNote: null,
+          );
+
+      _noteController.clear();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('💌 Pesan manis terkirim!'),
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal mengirim pesan: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSending = false);
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteSticker(CustomCoupleSticker sticker) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Hapus Stiker ${sticker.emoji}?'),
+        content: Text('Apakah kamu yakin ingin menghapus stiker "${sticker.text}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            key: Key('confirmDeleteSticker_${sticker.id}'),
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await ref.read(profileRepositoryProvider).deleteCustomSticker(
+              profileId: widget.profile.id,
+              stickerId: sticker.id,
+            );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Stiker ${sticker.emoji} dihapus'),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal menghapus stiker: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   Future<void> _openAddStickerDialog() async {
     await showDialog<CustomCoupleSticker>(
       context: context,
@@ -123,8 +224,8 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
     final customCareStickers =
         widget.profile.customStickers.where((s) => !s.isReply).toList();
     final allStickers = [
-      ...CoupleCareCatalog.defaultCareStickers,
       ...customCareStickers,
+      ...CoupleCareCatalog.defaultCareStickers,
     ];
 
     return Container(
@@ -179,6 +280,40 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
               separatorBuilder: (context, index) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final sticker = allStickers[index];
+                final isCustom = !sticker.id.startsWith('default_');
+
+                if (isCustom) {
+                  return GestureDetector(
+                    key: Key('sticker_chip_${sticker.id}'),
+                    onTap: _isSending ? null : () => _sendSticker(sticker),
+                    onLongPress: () => _confirmDeleteSticker(sticker),
+                    child: InputChip(
+                      avatar: Text(
+                        sticker.emoji,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      label: Text(
+                        _chipLabel(sticker),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                      ),
+                      tooltip: sticker.text,
+                      backgroundColor: isDark
+                          ? CycleColors.primary.withValues(alpha: 0.15)
+                          : CycleColors.primary.withValues(alpha: 0.08),
+                      side: BorderSide(
+                        color: CycleColors.primary.withValues(alpha: 0.2),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      onDeleted: () => _confirmDeleteSticker(sticker),
+                      deleteIcon: const Icon(Icons.close_rounded, size: 14),
+                      deleteButtonTooltipMessage: 'Hapus stiker',
+                    ),
+                  );
+                }
+
                 return ActionChip(
                   key: Key('sticker_chip_${sticker.id}'),
                   avatar: Text(
@@ -207,11 +342,12 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
           ),
           const SizedBox(height: 12),
 
-          // Optional quick love note field
+          // Optional quick love note field with send button
           TextField(
             key: const Key('quickLoveNoteInput'),
             controller: _noteController,
             textInputAction: TextInputAction.send,
+            onSubmitted: (_) => _sendStandaloneNote(),
             decoration: InputDecoration(
               hintText: 'Tulis pesan manis tambahan... (opsional)',
               hintStyle: TextStyle(
@@ -222,6 +358,12 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
                 Icons.favorite_border_rounded,
                 size: 18,
                 color: CycleColors.primary,
+              ),
+              suffixIcon: IconButton(
+                key: const Key('sendQuickNoteBtn'),
+                icon: const Icon(Icons.send_rounded, size: 18, color: CycleColors.primary),
+                tooltip: 'Kirim pesan manis',
+                onPressed: _isSending ? null : _sendStandaloneNote,
               ),
               filled: true,
               fillColor: isDark
