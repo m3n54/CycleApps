@@ -37,13 +37,16 @@ service cloud.firestore {
         (request.auth.uid in resource.data.memberUids
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'name',
+            'partnerName',
             'defaultCycleLength',
             'defaultPeriodLength',
             'activeSignal',
             'signalUpdatedAt',
             'signalReaction',
             'customStickers',
-            'lastInteraction'
+            'lastInteraction',
+            'selectedMascot',
+            'anniversaryDate'
           ]))
         || isValidJoin()
       );

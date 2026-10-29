@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../domain/couple_care.dart';
 import '../domain/couple_interaction.dart';
+import '../domain/cycle_mascot.dart';
 import '../domain/cycle_profile.dart';
 import 'invite_code.dart';
 
@@ -208,5 +209,56 @@ class ProfileRepository {
     );
     list.removeWhere((item) => item['id'] == stickerId);
     await _profile(profileId).update({'customStickers': list});
+  }
+
+  Future<void> updateMascot({
+    required String profileId,
+    required MascotCharacter mascot,
+  }) =>
+      _profile(profileId).update({
+        'selectedMascot': mascot.name,
+      });
+
+  Future<void> updateCoupleMetadata({
+    required String profileId,
+    String? partnerName,
+    DateTime? anniversaryDate,
+  }) {
+    final updates = <String, dynamic>{};
+    if (partnerName != null) {
+      updates['partnerName'] = partnerName.trim();
+    }
+    if (anniversaryDate != null) {
+      final y = anniversaryDate.year.toString().padLeft(4, '0');
+      final m = anniversaryDate.month.toString().padLeft(2, '0');
+      final d = anniversaryDate.day.toString().padLeft(2, '0');
+      updates['anniversaryDate'] = '$y-$m-$d';
+    }
+    return _profile(profileId).update(updates);
+  }
+
+  Future<int> markInteractionsAsRead({
+    required String profileId,
+    required String readerUid,
+  }) async {
+    final snapshot = await _db
+        .collection('profiles')
+        .doc(profileId)
+        .collection('interactions')
+        .where('isRead', isEqualTo: false)
+        .get();
+
+    final unreadFromPartner = snapshot.docs
+        .where((doc) => doc.data()['senderUid'] != readerUid)
+        .toList();
+
+    if (unreadFromPartner.isEmpty) return 0;
+
+    final batch = _db.batch();
+    for (final doc in unreadFromPartner) {
+      batch.update(doc.reference, {'isRead': true});
+    }
+    await batch.commit();
+    return unreadFromPartner.length;
   }
 }
