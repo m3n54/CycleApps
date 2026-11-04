@@ -80,4 +80,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(auth.currentUser, isNull);
   });
+
+  testWidgets('edit profile button opens CoupleProfileEditDialog and updates names in Firestore', (tester) async {
+    await pump(tester);
+    expect(find.byKey(const Key('editProfileSettingsBtn')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('editProfileSettingsBtn')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('profileNameInput')), findsOneWidget);
+    expect(find.byKey(const Key('partnerNameInput')), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('profileNameInput')), 'Sari Cinta');
+    await tester.enterText(find.byKey(const Key('partnerNameInput')), 'Budi Sayang');
+    await tester.tap(find.byKey(const Key('saveCoupleMetadataBtn')));
+    await tester.pumpAndSettle();
+
+    final doc = await db.doc('profiles/p1').get();
+    expect(doc.data()?['name'], 'Sari Cinta');
+    expect(doc.data()?['partnerName'], 'Budi Sayang');
+  });
 }

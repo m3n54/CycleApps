@@ -148,6 +148,8 @@ void main() {
       );
       expect(find.text('Cek Pembaruan Aplikasi'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Cek Pembaruan Aplikasi'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cek Pembaruan Aplikasi'));
       await tester.pumpAndSettle();
 

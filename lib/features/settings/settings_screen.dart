@@ -8,6 +8,7 @@ import '../../state/update_controller.dart';
 import '../../theme/cycle_theme.dart';
 import '../calendar/prediction_summary.dart';
 import '../common/widgets/responsive_bounds.dart';
+import '../couple/widgets/couple_profile_edit_dialog.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -293,7 +294,83 @@ class SettingsScreen extends ConsumerWidget {
                             ? 'Pemilik Profil • ${profile.memberUids.length} anggota'
                             : 'Mode Pasangan • ${profile?.memberUids.length ?? 0} anggota',
                       ),
+                      trailing: profile != null
+                          ? OutlinedButton.icon(
+                              key: const Key('editProfileSettingsBtn'),
+                              onPressed: () => CoupleProfileEditDialog.show(context, profile),
+                              icon: const Icon(Icons.edit_outlined, size: 14),
+                              label: const Text('Edit'),
+                              style: OutlinedButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                foregroundColor: CycleColors.primary,
+                                side: const BorderSide(color: CycleColors.primary),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            )
+                          : null,
                     ),
+                    if (profile != null && profile.hasPartner) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: theme.brightness == Brightness.dark
+                                ? CycleColors.primary.withValues(alpha: 0.1)
+                                : const Color(0xFFFFF0F5),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: CycleColors.primary.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Column(
+                                children: [
+                                  Text(
+                                    'Cewek (Pemilik)',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '🌸 ' + (profile.name.isNotEmpty ? profile.name : '-'),
+                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                              const Text('💕', style: TextStyle(fontSize: 18)),
+                              Column(
+                                children: [
+                                  Text(
+                                    'Cowok (Pasangan)',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '💙 ' + (profile.partnerName.isNotEmpty ? profile.partnerName : 'Belum diatur'),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14,
+                                      color: profile.partnerName.isNotEmpty ? null : Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                     const Divider(height: 1),
                     _SettingsTile(
                       leading: CircleAvatar(
