@@ -183,7 +183,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     )
-                  else
+                  else ...[
                     Wrap(
                       spacing: 8,
                       runSpacing: 6,
@@ -191,6 +191,24 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         if (selectedEntry.flow != null)
                           Chip(
                             label: Text('Aliran: ${flowLabels[selectedEntry.flow!]}'),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        if (selectedEntry.energy != null)
+                          Chip(
+                            avatar: const Icon(Icons.bolt_rounded, size: 16),
+                            label: Text('Energi: ${energyLabels[selectedEntry.energy!]}'),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        if (selectedEntry.cervicalMucus != null)
+                          Chip(
+                            avatar: const Icon(Icons.opacity_rounded, size: 16),
+                            label: Text(cervicalMucusLabels[selectedEntry.cervicalMucus!] ?? ''),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        if (selectedEntry.sexualActivity != null)
+                          Chip(
+                            avatar: const Icon(Icons.favorite_rounded, size: 16),
+                            label: Text(sexualActivityLabels[selectedEntry.sexualActivity!] ?? ''),
                             visualDensity: VisualDensity.compact,
                           ),
                         for (final s in selectedEntry.symptoms)
@@ -205,6 +223,39 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           ),
                       ],
                     ),
+                    if (selectedEntry.note.trim().isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? CycleColors.surfaceDark
+                              : CycleColors.primary.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: CycleColors.primary.withValues(alpha: 0.15),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.edit_note_rounded, size: 18, color: CycleColors.primary),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                selectedEntry.note,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  height: 1.4,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ],
               ),
             ),

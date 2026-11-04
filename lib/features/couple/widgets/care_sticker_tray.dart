@@ -270,7 +270,7 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
                 ),
                 icon: const Icon(Icons.add_rounded, size: 16),
                 label: const Text(
-                  '+ Tambah',
+                  'Tambah',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -403,3 +403,4 @@ class _CareStickerTrayState extends ConsumerState<CareStickerTray> {
     );
   }
 }
+

@@ -6,8 +6,8 @@ import 'package:ota_update/ota_update.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
 
 /// Versi aplikasi saat ini (sesuai `pubspec.yaml`).
-const String kAppVersion = '1.0.1';
-const int kAppVersionCode = 2;
+const String kAppVersion = '1.0.2';
+const int kAppVersionCode = 3;
 
 /// Informasi rilis aplikasi terbaru dari remote (Firestore / GitHub).
 class AppReleaseInfo {

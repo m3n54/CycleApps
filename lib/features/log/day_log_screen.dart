@@ -23,10 +23,10 @@ class _DayLogScreenState extends ConsumerState<DayLogScreen> {
   FlowLevel? _flow;
   Energy? _energy;
   final Set<Mood> _moods = {};
-  bool _tiredMood = false;
   final Set<Symptom> _symptoms = {};
   CervicalMucus? _cervicalMucus;
   SexualActivity? _sexualActivity;
+  Set<String> _selfCareCompleted = {};
   final _note = TextEditingController();
 
   String get _key => dateKey(widget.date);
@@ -89,6 +89,7 @@ class _DayLogScreenState extends ConsumerState<DayLogScreen> {
         _energy = e.energy;
         _cervicalMucus = e.cervicalMucus;
         _sexualActivity = e.sexualActivity;
+        _selfCareCompleted = {...e.selfCareCompleted};
         _note.text = e.note;
         break;
       }
@@ -113,6 +114,7 @@ class _DayLogScreenState extends ConsumerState<DayLogScreen> {
       energy: _energy,
       cervicalMucus: _cervicalMucus,
       sexualActivity: _sexualActivity,
+      selfCareCompleted: _selfCareCompleted,
       note: _note.text.trim(),
     );
     // Tidak di-await: saat offline Future baru selesai setelah sinkron.
@@ -224,13 +226,7 @@ class _DayLogScreenState extends ConsumerState<DayLogScreen> {
                       activeColor: CycleColors.accent,
                       onTap: () => _toggleMood(mood),
                     ),
-                  SelectableTile(
-                    label: 'Lelah',
-                    icon: Icons.nightlight,
-                    selected: _tiredMood,
-                    activeColor: CycleColors.accent,
-                    onTap: () => setState(() => _tiredMood = !_tiredMood),
-                  ),
+
                 ],
               ),
             ),

@@ -60,8 +60,8 @@ void main() {
         available: true,
         currentPatch: 2,
         releaseInfo: const AppReleaseInfo(
-          versionCode: 3,
-          versionName: '1.0.2',
+          versionCode: 4,
+          versionName: '1.0.3',
           releaseNotes: 'Fitur baru dan perbaikan stabilitas.',
           downloadUrl: 'https://example.com/app.apk',
         ),
@@ -97,7 +97,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(UpdateBannerCard), findsOneWidget);
-      expect(find.textContaining('Pembaruan Siklus v1.0.2 Tersedia'), findsWidgets);
+      expect(find.textContaining('Pembaruan Siklus v1.0.3 Tersedia'), findsWidgets);
       expect(find.text('Perbarui Sekarang'), findsWidgets);
 
       await tester.tap(find.text('Perbarui Sekarang').last);
@@ -143,7 +143,7 @@ void main() {
 
       expect(find.text('Versi Aplikasi Siklus'), findsOneWidget);
       expect(
-        find.text('Versi 1.0.1 • Patch #3 (Auto-Update Aktif)'),
+        find.text('Versi 1.0.2 • Patch #3 (Auto-Update Aktif)'),
         findsOneWidget,
       );
       expect(find.text('Cek Pembaruan Aplikasi'), findsOneWidget);

@@ -136,4 +136,31 @@ void main() {
 
     expect((await db.doc('profiles/p1/days/2026-10-15').get()).exists, isFalse);
   });
+
+
+  testWidgets('preserves selfCareCompleted when editing other fields', (tester) async {
+    await db.doc('profiles/p1/days/2026-10-15').set({
+      'date': '2026-10-15',
+      'flow': 'light',
+      'symptoms': <String>[],
+      'moods': <String>[],
+      'energy': null,
+      'cervicalMucus': null,
+      'sexualActivity': null,
+      'selfCareCompleted': ['water_hydration', 'warm_compress'],
+      'note': '',
+      'updatedBy': 'u1',
+    });
+    await openLog(tester, expectedEntries: 1);
+
+    await tester.ensureVisible(find.text('Sedang'));
+    await tester.tap(find.text('Sedang'));
+    await tester.pump();
+    await tester.tap(find.text('Simpan Catatan'));
+    await tester.pumpAndSettle();
+
+    final data = (await db.doc('profiles/p1/days/2026-10-15').get()).data()!;
+    expect(data['flow'], 'medium');
+    expect(data['selfCareCompleted'], containsAll(['water_hydration', 'warm_compress']));
+  });
 }
