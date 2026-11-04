@@ -143,7 +143,7 @@ void main() {
 
       expect(find.text('Versi Aplikasi Siklus'), findsOneWidget);
       expect(
-        find.text('Versi 1.0.2 • Patch #3 (Auto-Update Aktif)'),
+        find.text('Versi 1.0.3 • Patch #3 (Auto-Update Aktif)'),
         findsOneWidget,
       );
       expect(find.text('Cek Pembaruan Aplikasi'), findsOneWidget);
